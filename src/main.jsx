@@ -2,7 +2,6 @@ import React from "react";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import ReactDOM from "react-dom/client";
 import Movies from './pages/movies/Movies.jsx';
-import Anime from "./pages/anime/Anime.jsx";
 import Shows from './pages/shows/Shows.jsx';
 import Home from './pages/Home.jsx'
 import Search from "./pages/search/Search.jsx";
@@ -16,6 +15,7 @@ import {
   Link,
 } from "react-router-dom";
 import pageTheme from '../pageTheme.js';
+import Profile from "./pages/profile/Profile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -35,12 +35,12 @@ const router = createBrowserRouter([
         element: <Shows />,
       },
       {
-        path: "/anime",
-        element: <Anime />,
+        path: "/search",
+        element: <Search />,
       },
       {
-        path: "/search",
-        element: <Search/>,
+        path: "/profile",
+        element: <Profile />,
       },
       {
         path: "/:type/:id",
