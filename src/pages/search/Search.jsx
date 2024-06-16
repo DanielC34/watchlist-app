@@ -1,5 +1,6 @@
 import { Container, Flex, Heading } from '@chakra-ui/react';
 import React from 'react'
+import SearchInput from '../../components/SearchInput';
 
 const Search = () => {
   return (
@@ -10,6 +11,7 @@ const Search = () => {
             Find what fits you
           </Heading>
         </Flex>
+        <SearchInput />
       </Container>
     </div>
   );
