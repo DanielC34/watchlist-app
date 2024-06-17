@@ -1,5 +1,6 @@
 import { Container, Flex, Heading } from '@chakra-ui/react'
 import React from 'react'
+import ToggleSwitch from '../components/ToggleSwitch';
 
 const Home = () => {
   return (
@@ -8,6 +9,7 @@ const Home = () => {
         <Heading as="h2" fontSize={"md"} textTransform={"uppercase"}>
           Trending
         </Heading>
+        <ToggleSwitch />
       </Flex>
     </Container>
   );

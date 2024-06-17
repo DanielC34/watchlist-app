@@ -2,9 +2,9 @@ import React from "react";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import ReactDOM from "react-dom/client";
 import Movies from './pages/movies/Movies.jsx';
-import Anime from "./pages/anime/Anime.jsx";
 import Shows from './pages/shows/Shows.jsx';
 import Home from './pages/Home.jsx'
+import Logout from './pages/logout/Logout.jsx'
 import Search from "./pages/search/Search.jsx";
 import Details from "./pages/details/Details.jsx";
 import App from './App';
@@ -16,6 +16,8 @@ import {
   Link,
 } from "react-router-dom";
 import pageTheme from '../pageTheme.js';
+import Profile from "./pages/profile/Profile.jsx";
+import Watchlist from "./pages/watchlist/Watchlist.jsx";
 
 const router = createBrowserRouter([
   {
@@ -35,12 +37,20 @@ const router = createBrowserRouter([
         element: <Shows />,
       },
       {
-        path: "/anime",
-        element: <Anime />,
+        path: "/search",
+        element: <Search />,
       },
       {
-        path: "/search",
-        element: <Search/>,
+        path: "/profile",
+        element: <Profile />,
+      },
+      {
+        path: "/watchlist",
+        element: <Watchlist />,
+      },
+      {
+        path: "/logout",
+        element: <Logout />,
       },
       {
         path: "/:type/:id",
