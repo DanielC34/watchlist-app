@@ -1,4 +1,14 @@
-import { Container, Flex, Heading } from '@chakra-ui/react';
+import {
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+} from "@chakra-ui/react";
+import { ChevronDownIcon } from "@chakra-ui/icons";
 
 const Shows = () => {
   return (
@@ -7,6 +17,14 @@ const Shows = () => {
         <Heading as="h2" fontSize={"md"} textTransform={"uppercase"}>
           Discover new Shows
         </Heading>
+        <Menu>
+          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+            Popular
+          </MenuButton>
+          <MenuList>
+            <MenuItem>Top Rated</MenuItem>
+          </MenuList>
+        </Menu>
       </Flex>
     </Container>
   );
