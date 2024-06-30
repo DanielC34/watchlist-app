@@ -14,7 +14,7 @@ const Navbar = () => {
               <Box
                 fontSize={"2xl"}
                 fontWeight={"bold"}
-                color={"red"}
+                color={"yellow"}
                 letterSpacing={"widest"}
                 fontFamily={"mono"}
               >
