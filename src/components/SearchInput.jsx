@@ -1,18 +1,15 @@
 import React from "react";
-import { Center, Input, Box } from "@chakra-ui/react";
+import { Input, Button } from "@chakra-ui/react";
+import { FaSearch } from "react-icons/fa";
 
 const SearchInput = () => {
   return (
-      <Box>
-        <Center
-          h="100px"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <Input placeholder="Search movies, TV Shows..." />
-        </Center>
-      </Box>
+    <div className="flex space-x-2">
+      <Input placeholder="Search" className="bg-gray-700" />
+      <Button colorScheme="red">
+        <FaSearch />
+      </Button>
+    </div>
   );
 };
 

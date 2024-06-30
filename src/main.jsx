@@ -18,6 +18,7 @@ import {
 import pageTheme from '../pageTheme.js';
 import Profile from "./pages/profile/Profile.jsx";
 import Watchlist from "./pages/watchlist/Watchlist.jsx";
+import History from './components/History.jsx';
 
 const router = createBrowserRouter([
   {
@@ -30,7 +31,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/movies",
-        element: <Movies/>,
+        element: <Movies />,
       },
       {
         path: "/shows",
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: "/watchlist",
         element: <Watchlist />,
+      },
+      {
+        path: "/history",
+        element: <History />,
       },
       {
         path: "/logout",
