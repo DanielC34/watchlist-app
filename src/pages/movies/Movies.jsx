@@ -1,25 +1,44 @@
-import { Container, Flex, Heading, Menu, MenuButton, MenuList, Button, MenuItem } from '@chakra-ui/react';
-import React from 'react'
+jsx;
+import {
+  Box,
+  Badge,
+  Flex,
+  Heading,
+  Menu,
+  MenuButton,
+  Button,
+  Container,
+  MenuList,
+  MenuItem,
+} from "@chakra-ui/react";
+import { FaPlus } from "react-icons/fa";
 import { ChevronDownIcon } from "@chakra-ui/icons";
 
 const Movies = () => {
   return (
-    <Container maxW={"container.xl"}>
-      <Flex alignItems={"baseline"} gap={"4"} my={"10"}>
-        <Heading as="h2" fontSize={"md"} textTransform={"uppercase"}>
-          Discover new Movies
-        </Heading>
-        <Menu>
-          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-            Popular
-          </MenuButton>
-          <MenuList>
-            <MenuItem>Top Rated</MenuItem>
-          </MenuList>
-        </Menu>
-      </Flex>
-    </Container>
+    <div className="bg-gray-100 p-4">
+      <h2 className="font-bold text-xl">Trending Movies</h2>
+      <Container maxW="container.xl">
+        <Flex alignItems="baseline" gap="4" my="10">
+          <Heading as="h2" fontSize="md" textTransform="uppercase">
+            Discover new Movies
+          </Heading>
+          <Menu>
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              className="bg-blue-500 text-white"
+            >
+              Popular
+            </MenuButton>
+            <MenuList>
+              <MenuItem className="text-gray-700">Top Rated</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
+      </Container>
+    </div>
   );
-}
+};
 
-export default Movies
+export default Movies;
