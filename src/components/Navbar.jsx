@@ -5,6 +5,7 @@ import { FaHome, FaHistory, FaFilm, FaTv, FaPlus, FaTimes, FaBars } from "react-
 import Profile from '../pages/profile/Profile';
 import SearchInput from '../components/SearchInput';
 import { Button } from '@chakra-ui/react';
+import Details from '../pages/details/Details';
 
 const Navbar = () => {
 
@@ -65,6 +66,11 @@ const Navbar = () => {
           </Link>
           <Divider orientation="horizontal" />
           <h3>My Lists</h3>
+          <Link to="/createlist">
+            <span>
+              <Details />
+            </span>
+          </Link>
         </nav>
         <div className="mt-auto text-center">
           <Button colorScheme="red" variant="solid">
