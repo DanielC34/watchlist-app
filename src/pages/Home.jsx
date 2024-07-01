@@ -6,7 +6,7 @@ import SearchInput from '../components/SearchInput';
 const Home = () => {
   return (
     <>
-      <h2 className='font-semibold'>Trending Movies</h2>
+      <h2 className='font-semibold'>Trending</h2>
       {/*Movie Cards come here */}
       <div>Movie Cards come here</div>
     </>

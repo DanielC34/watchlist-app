@@ -1,28 +1,42 @@
-import React from "react";
+jsx;
+import {
+  Box,
+  Badge,
+  Flex,
+  Heading,
+  Menu,
+  MenuButton,
+  Button,
+  Container,
+  MenuList,
+  MenuItem,
+} from "@chakra-ui/react";
 import { FaPlus } from "react-icons/fa";
-import { Image, Box, Badge } from "@chakra-ui/react";
-
-const movies = [
-  {
-    id: 1,
-    title: "Top Gun: Maverick",
-    year: 2022,
-    rating: 83,
-    poster: "/path/to/topgun.jpg",
-  },
-  {
-    id: 2,
-    title: "Fantastic Beasts: The Secrets of Dumbledore",
-    year: 2022,
-    rating: 68,
-    poster: "/path/to/fantasticbeasts.jpg",
-  },
-];
+import { ChevronDownIcon } from "@chakra-ui/icons";
 
 const Movies = () => {
   return (
-    <div>
-        Movies
+    <div className="bg-gray-100 p-4">
+      <h2 className="font-bold text-xl">Trending Movies</h2>
+      <Container maxW="container.xl">
+        <Flex alignItems="baseline" gap="4" my="10">
+          <Heading as="h2" fontSize="md" textTransform="uppercase">
+            Discover new Movies
+          </Heading>
+          <Menu>
+            <MenuButton
+              as={Button}
+              rightIcon={<ChevronDownIcon />}
+              className="bg-blue-500 text-white"
+            >
+              Popular
+            </MenuButton>
+            <MenuList>
+              <MenuItem className="text-gray-700">Top Rated</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
+      </Container>
     </div>
   );
 };
