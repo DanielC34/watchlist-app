@@ -1,4 +1,3 @@
-jsx;
 import {
   Box,
   Badge,
@@ -16,7 +15,7 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 
 const Movies = () => {
   return (
-    <div className="bg-gray-100 p-4">
+    <div>
       <h2 className="font-bold text-xl">Trending Movies</h2>
       <Container maxW="container.xl">
         <Flex alignItems="baseline" gap="4" my="10">
