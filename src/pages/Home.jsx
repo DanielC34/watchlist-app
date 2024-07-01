@@ -1,12 +1,14 @@
 import { Container, Flex, Heading } from '@chakra-ui/react'
 import React from 'react'
-import ToggleSwitch from '../components/ToggleSwitch';
+import Movies from '../pages/movies/Movies.jsx'
 import SearchInput from '../components/SearchInput';
 
 const Home = () => {
   return (
     <>
-      <SearchInput />
+      <h2 className='font-semibold'>Trending Movies</h2>
+      {/*Movie Cards come here */}
+      <div>Movie Cards come here</div>
     </>
   );
 }
