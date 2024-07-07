@@ -20,6 +20,8 @@ import Profile from "./pages/profile/Profile.jsx";
 import Watchlist from "./pages/watchlist/Watchlist.jsx";
 import History from './pages/history/History.jsx';
 import CreatedList from './pages/createdlist/CreatedList.jsx';
+import Login from './pages/login/Login.jsx';
+import Signup from './pages/signup/Signup.jsx'
 
 const router = createBrowserRouter([
   {
@@ -57,6 +59,14 @@ const router = createBrowserRouter([
       {
         path: "/history",
         element: <History />,
+      },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/signup",
+        element: <Signup />,
       },
       {
         path: "/logout",
