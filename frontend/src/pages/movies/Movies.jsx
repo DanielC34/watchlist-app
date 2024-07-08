@@ -6,8 +6,21 @@ import {
   FormLabel,
   Select,
 } from "@chakra-ui/react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const Movies = () => {
+
+  // const baseUrl = "https://api.themoviedb.org/3/discover/movie";
+
+  // const fetchMovies = async () => {
+  //   try {
+        
+  //     }
+  // }
+
+
+
   return (
     <div>
       <h2 className="font-bold text-xl">Trending Movies</h2>
