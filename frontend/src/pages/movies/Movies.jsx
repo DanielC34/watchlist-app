@@ -6,8 +6,20 @@ import {
   FormLabel,
   Select,
 } from "@chakra-ui/react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
+const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
+const BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/popular";
 
 const Movies = () => {
+
+  // const fetchMovies = async () => {
+  //   try {
+
+  //     }
+  // }
+
   return (
     <div>
       <h2 className="font-bold text-xl">Trending Movies</h2>
