@@ -9,17 +9,16 @@ import {
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-const Movies = () => {
+const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
+const BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie/popular";
 
-  // const baseUrl = "https://api.themoviedb.org/3/discover/movie";
+const Movies = () => {
 
   // const fetchMovies = async () => {
   //   try {
-        
+
   //     }
   // }
-
-
 
   return (
     <div>
