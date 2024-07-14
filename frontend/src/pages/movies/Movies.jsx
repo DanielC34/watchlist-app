@@ -8,6 +8,7 @@ import {
   Select,
 } from "@chakra-ui/react";
 import axios from "axios";
+import Loading from "../../components/Loading.jsx";
 import { useEffect, useState } from "react";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
@@ -19,6 +20,7 @@ const Movies = () => {
   const [category, setCategory] = useState("popular"); //Stores the selected time frame category ('popular', 'top_rated', 'upcoming')
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchMovies(category, currentPage);
@@ -27,6 +29,7 @@ const Movies = () => {
   // Function to fetch movies from TMDb API based on category and page
   const fetchMovies = async (category, page) => {
     try {
+      setLoading(true); //Sets loading to true while Movie show data is being fetched
       const response = await axios.get(
         `${BASE_MOVIE_URL}/movie/${category}?api_key=${API_KEY}&page=${page}`
       );
@@ -37,6 +40,8 @@ const Movies = () => {
       setTotalPages(totalPagesCount);
     } catch (error) {
       console.error(`Error fetching ${category} movies:`, error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -76,23 +81,28 @@ const Movies = () => {
           </FormControl>
         </Flex>
       </Container>
+
       {/*List of fetched movies from API comes here */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {movies.map((movie) => (
-          <div
-            key={movie.id}
-            className="movie-card border rounded-lg shadow-lg p-2"
-          >
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-              className="w-full h-auto rounded-md"
-            />
-            <h3 className="text-lg font-semibold mt-2">{movie.title}</h3>
-            <p className="text-sm">{movie.release_date}</p>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {movies.map((movie) => (
+            <div
+              key={movie.id}
+              className="movie-card border rounded-lg shadow-lg p-2"
+            >
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                alt={movie.title}
+                className="w-full h-auto rounded-md"
+              />
+              <h3 className="text-lg font-semibold mt-2">{movie.title}</h3>
+              <p className="text-sm">{movie.release_date}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Pagination controls */}
       <Flex justifyContent="center" my="4">
