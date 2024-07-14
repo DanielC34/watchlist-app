@@ -8,6 +8,7 @@ import {
   Select,
 } from "@chakra-ui/react";
 import axios from "axios";
+import Loading from '../../components/Loading.jsx'
 import { useEffect, useState } from "react";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
@@ -19,10 +20,12 @@ const Shows = () => {
   const [category, setCategory] = useState("popular"); //Stores the selected time frame category ('popular', 'top_rated', 'upcoming')
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
+  const [loading, setLoading] = useState(false);
 
   // Function to fetch shows from TMDb API based on category and page
   const fetchShows = async (category, page) => {
     try {
+      setLoading(true); //Sets loading to true while TV show data is being fetched
       const response = await axios.get(
         `${BASE_SHOW_URL}/tv/${category}?api_key=${API_KEY}&page=${page}`
       );
@@ -33,6 +36,8 @@ const Shows = () => {
       setTotalPages(totalPagesCount);
     } catch (error) {
       console.error(`Error fetching ${category} tv shows:`, error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -77,23 +82,27 @@ const Shows = () => {
           </FormControl>
         </Flex>
       </Container>
-      {/*List of TV shows from API comes here */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {shows.map((show) => (
-          <div
-            key={show.id}
-            className="show-card border rounded-lg shadow-lg p-2"
-          >
-            <img
-              src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-              alt={show.name}
-              className="w-full h-auto rounded-md"
-            />
-            <h3 className="text-lg font-semibold mt-2">{show.name}</h3>
-            <p className="text-sm">{show.first_air_date}</p>
-          </div>
-        ))}
-      </div>
+
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {shows.map((show) => (
+            <div
+              key={show.id}
+              className="show-card border rounded-lg shadow-lg p-2"
+            >
+              <img
+                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                alt={show.name}
+                className="w-full h-auto rounded-md"
+              />
+              <h3 className="text-lg font-semibold mt-2">{show.name}</h3>
+              <p className="text-sm">{show.first_air_date}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Pagination controls */}
       <Flex justifyContent="center" my="4">

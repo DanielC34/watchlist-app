@@ -42,7 +42,7 @@ const Navbar = () => {
           />
         </div>
         <nav className="flex-1 flex flex-col space-y-2">
-          <SearchInput />
+          {/* <SearchInput /> */}
           <Link to="/" className="flex items-center space-x-2">
             <FaHome />
             <span>Home</span>
