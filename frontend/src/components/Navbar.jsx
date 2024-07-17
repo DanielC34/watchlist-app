@@ -18,14 +18,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/*Overlay */}
-      {/* <div
-        className={`fixed inset-0 bg-gray-800 bg-opacity-75 z-40 md:hidden ${
-          isOpen ? "block" : "hidden"
-        }`}
-        onClick={toggleSidebar}
-      ></div> */}
-
       {/*Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 transform ${
@@ -68,7 +60,7 @@ const Navbar = () => {
           <h3>My Lists</h3>
           <Link to="/createlist">
             <span>
-              <Details />
+              {/* <Details /> */}
             </span>
           </Link>
         </nav>
