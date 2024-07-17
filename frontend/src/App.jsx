@@ -9,7 +9,7 @@ function App() {
       <Navbar />
       <div className="flex-1 flex flex-col">
         <Header />
-        <div className="p-4 flex flex-col space-y-4">
+        <div className="p-4 flex flex-col space-y-4 bg-gray-900 text-white">
           <Outlet />
         </div>
       </div>

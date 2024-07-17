@@ -1,5 +1,6 @@
 import { Container, Flex, FormLabel, FormControl, Select, Button } from '@chakra-ui/react'
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Loading from "../components/Loading.jsx";
 
@@ -13,7 +14,7 @@ const Home = () => {
   const [timeframe, setTimeframe] = useState("day"); //Stores the selected time frame ('day' for today, 'week' for this week).
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTrending(timeframe, currentPage);
@@ -31,14 +32,14 @@ const Home = () => {
       const totalItems = response.data.total_results;
       const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
       setTotalPages(totalPagesCount);
+      setLoading(false);
     } catch (error) {
       console.error(
         "Error fetching trending data for trending movies & tv shows:",
         error
       );
-    } finally {
       setLoading(false);
-    }
+    } 
   };
 
   // Function to handle timeframe selection change
@@ -63,9 +64,6 @@ const Home = () => {
     <>
       <Container maxW="container.xl">
         <Flex alignItems="baseline" gap="4" my="10">
-          {/* <Heading as="h2" fontSize="md" textTransform="uppercase">
-            Discover new Movies
-          </Heading> */}
           <FormControl>
             <FormLabel>Find out what is trending</FormLabel>
             <Select
@@ -87,22 +85,21 @@ const Home = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {trending.map((item) => (
-            <div
-              key={item.id}
-              className="movie-card border rounded-lg shadow-lg p-2"
-            >
-              <img
-                src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                alt={item.title || item.name}
-                className="w-full h-auto rounded-md"
-              />
-              <h3 className="text-lg font-semibold mt-2">
-                {item.title || item.name}
-              </h3>
-              <p className="text-sm">
-                {item.release_date || item.first_air_date}
-              </p>
-            </div>
+            <Link to={`/details/${item.id}`} key={item.id}>
+              <div className="movie-card border rounded-lg shadow-lg p-2">
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                  alt={item.title || item.name}
+                  className="w-full h-auto rounded-md"
+                />
+                <h3 className="text-lg font-semibold mt-2">
+                  {item.title || item.name}
+                </h3>
+                <p className="text-sm">
+                  {item.release_date || item.first_air_date}
+                </p>
+              </div>
+            </Link>
           ))}
         </div>
       )}
@@ -115,7 +112,13 @@ const Home = () => {
         <p>
           Page {currentPage} of {totalPages}
         </p>
-        <Button onClick={nextPage} disabled={currentPage === totalPages} ml="2">
+        <Button
+          onClick={nextPage}
+          disabled={
+            trending.length < ITEMS_PER_PAGE || currentPage === totalPages
+          }
+          ml="2"
+        >
           Next
         </Button>
       </Flex>
