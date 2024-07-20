@@ -1,19 +1,17 @@
 import { Button, Input, Spinner, Container, Flex } from "@chakra-ui/react";
 import { FaSearch } from "react-icons/fa";
 import React, { useState, useEffect } from "react";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3/search/multi";
 
 const History = () => {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
 
   useEffect(() => {
     if (searchTerm.length > 0) {
@@ -41,8 +39,8 @@ const History = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleResultClick = (id) => {
-    navigate(`/details/${id}`);
+  const handleResultClick = (id, mediaType) => {
+    navigate(`/details/${id}`, { state: { type: mediaType } });
   };
 
   return (
@@ -74,7 +72,9 @@ const History = () => {
                 <div
                   key={result.id}
                   className="show-card border rounded-lg shadow-lg p-2 cursor-pointer"
-                  onClick={() => handleResultClick(result.id)}
+                  onClick={() =>
+                    handleResultClick(result.id, result.media_type)
+                  }
                 >
                   <img
                     src={`https://image.tmdb.org/t/p/w500${result.poster_path}`}
@@ -95,6 +95,6 @@ const History = () => {
       )}
     </div>
   );
-}
+};
 
-export default History
+export default History;
