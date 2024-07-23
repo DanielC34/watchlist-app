@@ -1,0 +1,20 @@
+{"level":"error","message":"Registration error: secretOrPrivateKey must be an asymmetric key when using RS256","timestamp":"2024-07-22T12:54:45.548Z"}
+{"level":"error","message":"Login failed for email: darius@gmail.com - Invalid credentials","timestamp":"2024-07-22T13:49:36.718Z"}
+{"level":"error","message":"Login failed for email: darius@gmail.com - Invalid credentials","timestamp":"2024-07-22T14:01:31.336Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid credentials","timestamp":"2024-07-22T14:25:22.163Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-22T14:30:04.833Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-22T14:37:25.561Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T09:44:47.921Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T09:45:06.747Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T09:47:37.733Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T09:48:00.082Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T09:55:10.718Z"}
+{"level":"error","message":"Login failed for email: testuser22@example.com - Invalid password","timestamp":"2024-07-23T10:44:40.480Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T10:48:01.269Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T10:52:08.714Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T11:02:08.055Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T11:30:41.379Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T11:55:10.098Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T11:55:32.372Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T11:57:21.889Z"}
+{"level":"error","message":"Login failed for email: testuser@example.com - Invalid password","timestamp":"2024-07-23T14:58:56.836Z"}
