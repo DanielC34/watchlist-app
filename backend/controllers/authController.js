@@ -2,7 +2,6 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const winston = require("winston");
-const joi = require("joi");
 
 // Configure the logger
 const logger = winston.createLogger({
