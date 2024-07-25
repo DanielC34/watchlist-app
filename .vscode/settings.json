@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["createlist", "MOVIEDB", "resave", "timeframe", "watchlist"]
+  "cSpell.words": ["createlist", "MOVIEDB", "resave", "timeframe", "watchlist"],
+  "codium.codeCompletion.enable": true
 }
