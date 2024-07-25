@@ -1,7 +1,10 @@
-const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const winston = require("winston");
+const {
+  createUser,
+  findUserByEmail,
+  comparePassword,
+} = require("../services/userService");
 
 // Configure the logger
 const logger = winston.createLogger({
@@ -23,21 +26,14 @@ exports.register = async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
   try {
-    const existingUser = await User.findOne({ email });
+    const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ error: "User already exists" });
     }
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const user = await User.create({
-      username,
-      email,
-      password: hashedPassword,
-    });
 
-    // Log the successful creation of the user and hashed password
+    const user = await createUser({ username, email, password });
+
     logger.info(`User created successfully: ${user._id}`);
-    console.log(`Hashed password: ${hashedPassword}`);
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
@@ -55,7 +51,6 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
-  // Check if email and password are provided
   if (!email || !password) {
     return res.status(400).json({
       message: "Email or Password not present",
@@ -63,7 +58,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = await User.findOne({ email });
+    const user = await findUserByEmail(email);
     if (!user) {
       logger.error(`Login failed for email: ${email} - User not found`);
       return res.status(400).json({
@@ -72,25 +67,16 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Log the stored password hash
-    console.log(`Stored password hash: ${user.password}`);
-
-    // Comparing given password with hashed password
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await comparePassword(password, user.password);
     console.log(`Password valid: ${isMatch}`);
 
     if (isMatch) {
-      // Generate a JWT token
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1h",
       });
 
-      res.cookie("token", token, { httpOnly: true }); // Store token in HttpOnly cookie
-
-      // Log the successful login of the user
+      res.cookie("token", token, { httpOnly: true });
       logger.info(`User logged in successfully: ${user._id}`);
-
-      // Send a success response with a confirmation message
       return res.status(200).json({ message: "Login successful", token });
     } else {
       logger.error(`Login failed for email: ${email} - Invalid password`);
