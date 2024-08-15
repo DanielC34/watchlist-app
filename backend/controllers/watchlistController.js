@@ -1,6 +1,6 @@
 const Watchlist = require("../models/Watchlist");
 
-//Function for fetching watchlist from database
+//Function to get watchlist from database
 exports.getWatchlist = async (req, res) => {
   const userId = req.user.id; // Extract the user ID from the request object to find user's desired watchlist
   try {
@@ -11,6 +11,7 @@ exports.getWatchlist = async (req, res) => {
   }
 };
 
+// Add an item to the watchlist
 exports.addToWatchlist = async (req, res) => {
   try {
     //Check if item already exists in user's watchlist by searching with userId and movieId
@@ -42,6 +43,7 @@ exports.addToWatchlist = async (req, res) => {
   }
 };
 
+// Delete an item from the watchlist
 exports.removeFromWatchlist = async (req, res) => {
   const { movieId, type } = req.body;
   const userId = req.user.id;

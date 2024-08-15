@@ -19,13 +19,18 @@ const BASE_TV_URL = "https://api.themoviedb.org/3/tv";
 const Details = () => {
   const { id } = useParams(); // Get the ID from the URL
   const navigate = useNavigate(); // Use useNavigate instead of useHistory
-  const { state } = useLocation(); // Get the state from the location
+  const { state } = useLocation(); // Provide a default empty object
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDetails = async () => {
       try {
+        if (!state || !state.type) {
+          console.log("Type is not defined in state");
+          return;
+        }
+
         const url =
           state.type === "movie"
             ? `${BASE_MOVIE_URL}/${id}?api_key=${API_KEY}`
@@ -41,7 +46,7 @@ const Details = () => {
     };
 
     fetchDetails();
-  }, [id, state.type]);
+  }, [id, state]);
 
   if (loading) {
     return <Spinner size="xl" />;

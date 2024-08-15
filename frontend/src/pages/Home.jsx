@@ -85,7 +85,11 @@ const Home = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {trending.map((item) => (
-            <Link to={`/details/${item.id}`} key={item.id}>
+            <Link
+              to={`/details/${item.id}`}
+              state={{ type: item.media_type }}
+              key={item.id}
+            >
               <div className="movie-card border rounded-lg shadow-lg p-2">
                 <img
                   src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
