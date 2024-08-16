@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Link,
   Button,
@@ -8,11 +7,8 @@ import {
   FormLabel,
   useToast,
 } from "@chakra-ui/react";
-
 import { FaEnvelope, FaLock } from "react-icons/fa";
-
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-
 import useAuthStore from "../../store/useAuthStore";
 
 const Login = () => {
@@ -20,26 +16,33 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const toast = useToast();
   const navigate = useNavigate();
-  const { login, setUsername } = useAuthStore();
+  const { login, user, isAuthenticated } = useAuthStore((state) => ({
+    login: state.login,
+    user: state.user,
+    isAuthenticated: state.isAuthenticated,
+  }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const user = await login(email, password);
+      // Trigger login action
+      await login(email, password);
 
-      // Assume 'login' returns a user object with a username
-      setUsername(user.username);
+      // Adding a slight delay before redirecting to ensure state update
+      setTimeout(() => {
+        if (isAuthenticated) {
+          toast({
+            title: "Login successful.",
+            description: `Hey there!! Welcome back, ${user.username}`,
+            status: "success",
+            duration: 5000,
+            isClosable: true,
+          });
 
-      toast({
-        title: "Login successful.",
-        description: `Hey there!! Welcome back ${user.username}`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-
-      navigate("/");
+          navigate("/movies"); // Redirecting to the movies page
+        }
+      }, 100); // Adjust delay as necessary
     } catch (error) {
       toast({
         title: "Error.",
@@ -62,7 +65,6 @@ const Login = () => {
             <FormLabel htmlFor="email" className="text-white">
               Email
             </FormLabel>
-
             <Input
               type="email"
               id="email"
@@ -77,7 +79,6 @@ const Login = () => {
             <FormLabel htmlFor="password" className="text-white">
               Password
             </FormLabel>
-
             <Input
               type="password"
               id="password"
