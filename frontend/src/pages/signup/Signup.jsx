@@ -1,4 +1,3 @@
-// src/components/Signup.js
 import React, { useState, useEffect } from "react";
 import {
   Button,
@@ -8,7 +7,7 @@ import {
   Link,
   useToast,
 } from "@chakra-ui/react";
-import { FaUser, FaLock } from "react-icons/fa";
+import { FaUser, FaLock, FaEnvelope } from "react-icons/fa";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
 
@@ -29,7 +28,8 @@ const Signup = () => {
 
     try {
       clearError();
-      await signup(username, email, password);
+      await signup(username, email, password); // Trigger signup action
+
       toast({
         title: "Account created.",
         description: `Hello!! Welcome to FilmVault, ${username}`,
@@ -37,7 +37,8 @@ const Signup = () => {
         duration: 5000,
         isClosable: true,
       });
-      navigate("/");
+
+      navigate("/"); // Redirect to home page after successful signup
     } catch (error) {
       toast({
         title: "Error.",
@@ -67,6 +68,7 @@ const Signup = () => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </FormControl>
+
           <FormControl isRequired>
             <FormLabel htmlFor="email" className="text-white">
               Email
@@ -75,11 +77,12 @@ const Signup = () => {
               type="email"
               id="email"
               placeholder="Enter your email"
-              leftIcon={<FaUser />}
+              leftIcon={<FaEnvelope />}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </FormControl>
+
           <FormControl isRequired>
             <FormLabel htmlFor="password" className="text-white">
               Password
@@ -93,9 +96,11 @@ const Signup = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </FormControl>
+
           <Button type="submit" colorScheme="red" size="lg" w="full">
             Sign Up
           </Button>
+
           <Link as={RouterLink} to="/login" color="gray.200" textAlign="center">
             Already have an account? Login here
           </Link>

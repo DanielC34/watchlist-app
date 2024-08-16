@@ -38,7 +38,15 @@ exports.register = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
-    res.status(201).json({ token });
+
+    res.status(201).json({
+      message: "Registration successful",
+      token,
+      user: {
+        username: user.username,
+        email: user.email,
+      },
+    });
   } catch (err) {
     logger.error(`Registration error: ${err.message}`);
     res.status(400).json({
@@ -77,7 +85,16 @@ exports.login = async (req, res) => {
 
       res.cookie("token", token, { httpOnly: true });
       logger.info(`User logged in successfully: ${user._id}`);
-      return res.status(200).json({ message: "Login successful", token });
+
+      // Return user details along with the token
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          username: user.username,
+          email: user.email,
+        },
+      });
     } else {
       logger.error(`Login failed for email: ${email} - Invalid password`);
       return res.status(400).json({
