@@ -1,0 +1,22 @@
+Component DropdownMenu:
+  - Import necessary modules and hooks:
+    - Import React
+    - Import useNavigate from react-router-dom
+    - Import useAuthStore for logout functionality
+    - Import required icons and TailwindCSS classes for styling
+
+  - Create DropdownMenu functional component:
+    - Use useNavigate hook for navigation
+    - Access logout function from useAuthStore
+
+    - Define handler functions:
+      - `handleLogout`: 
+        - Call `logout` from useAuthStore
+        - Redirect to home or login page
+
+    - Return JSX:
+      - Define dropdown menu container with TailwindCSS classes
+      - Add menu items:
+        - **Profile**: Link to `/profile` route
+        - **My Watchlists**: Link to `/watchlists` route
+        - **Logout**: Trigger `handleLogout` function
