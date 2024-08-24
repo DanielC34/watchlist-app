@@ -29,6 +29,7 @@ const useAuthStore = create((set) => ({
         error: null,
       });
 
+      // Store the token in localStorage for persistence
       localStorage.setItem("token", response.data.token);
     } catch (err) {
       set({
@@ -48,10 +49,8 @@ const useAuthStore = create((set) => ({
         password,
       });
 
-      // Log the entire response to debug
-      console.log("Login response:", response);
+      console.log("Login response:", response); // Debug log
 
-      // Check if the user data exists in the response
       if (response.data.user && response.data) {
         set({
           user: response.data.user,
@@ -59,6 +58,7 @@ const useAuthStore = create((set) => ({
           error: null,
         });
 
+        // Store the token in localStorage for persistence
         localStorage.setItem("token", response.data.token);
       } else {
         set({
@@ -68,7 +68,7 @@ const useAuthStore = create((set) => ({
         });
       }
     } catch (err) {
-      console.error("Login error:", err.response || err); // Log the error
+      console.error("Login error:", err.response || err); // Debug log
       set({
         user: { username: "", email: "" },
         isAuthenticated: false,
@@ -80,11 +80,25 @@ const useAuthStore = create((set) => ({
 
   // Function to handle user logout
   logout: () => {
+    // Clear token from localStorage
     localStorage.removeItem("token");
     set({
       user: { username: "", email: "" },
       isAuthenticated: false,
     });
+  },
+
+  // Function to check authentication state on initial load
+  checkAuthOnLoad: () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Make a request to validate the token if necessary, or just set the state
+      //checks if a token is stored in localStorage when the app first loads. If a token exists, the app assumes the user is still authenticated.
+      set({
+        isAuthenticated: true,
+        error: null,
+      });
+    }
   },
 }));
 
