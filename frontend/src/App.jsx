@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Header from "./components/Header";
+import useAuthStore from "./store/useAuthStore.jsx";
 
 function App() {
+  const checkAuthOnLoad = useAuthStore((state) => state.checkAuthOnLoad); // Access the checkAuthOnLoad function
+
+  // Run this code when the app first loads
+  useEffect(() => {
+    checkAuthOnLoad(); // Check if the user is already logged in
+  }, []); // Empty dependency array means this runs only once on load
+
   return (
     <div className="flex h-screen bg-gray-900 text-white">
       <Navbar />
