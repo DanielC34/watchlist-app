@@ -1,8 +1,12 @@
 const express = require("express");
-const { getUser } = require("../controllers/userController");
-const auth = require("../middleware/authMiddleware");
+const { getUser, updateUserProfilePicture } = require("../controllers/userController");
+const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
-router.get("/", auth, getUser);
+// Protect route to ensure only logged-in users can access
+router.get("/profile", protect, getUser);
+
+// Protect route for updating profile picture
+router.put("/profile/picture", protect, updateUserProfilePicture);
 
 module.exports = router;
