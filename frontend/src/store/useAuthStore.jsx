@@ -1,15 +1,16 @@
 import { create } from "zustand";
 import axios from "axios";
+import {
+  getUserProfile,
+  updateUserProfilePicture as updatePicture,
+} from "../utilities/api";
 
 const ROOT_URL = import.meta.env.VITE_ROOT_URL || "http://localhost:5000";
 
 const useAuthStore = create((set) => ({
   // Initial state for user and authentication
-  user: {
-    username: "",
-    email: "",
-  },
-  isAuthenticated: false,
+  user: JSON.parse(localStorage.getItem("user")) || { username: "", email: "" }, // Initialize from localStorage
+  isAuthenticated: !!localStorage.getItem("token"), // Check if token exists in localStorage
   error: null,
 
   clearError: () => set({ error: null }),
@@ -29,8 +30,9 @@ const useAuthStore = create((set) => ({
         error: null,
       });
 
-      // Store the token in localStorage for persistence
+      // Store the token and user data in localStorage for persistence
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
     } catch (err) {
       set({
         user: { username: "", email: "" },
@@ -51,15 +53,16 @@ const useAuthStore = create((set) => ({
 
       console.log("Login response:", response); // Debug log
 
-      if (response.data.user && response.data) {
+      if (response.data.user && response.data.token) {
         set({
           user: response.data.user,
           isAuthenticated: true,
           error: null,
         });
 
-        // Store the token in localStorage for persistence
+        // Store the token and user data in localStorage for persistence
         localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
       } else {
         set({
           user: { username: "", email: "" },
@@ -80,8 +83,9 @@ const useAuthStore = create((set) => ({
 
   // Function to handle user logout
   logout: () => {
-    // Clear token from localStorage
+    // Clear token and user data from localStorage
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
     set({
       user: { username: "", email: "" },
       isAuthenticated: false,
@@ -91,12 +95,58 @@ const useAuthStore = create((set) => ({
   // Function to check authentication state on initial load
   checkAuthOnLoad: () => {
     const token = localStorage.getItem("token");
-    if (token) {
-      // Make a request to validate the token if necessary, or just set the state
-      //checks if a token is stored in localStorage when the app first loads. If a token exists, the app assumes the user is still authenticated.
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
       set({
+        user: JSON.parse(storedUser), // Parse user data from localStorage
         isAuthenticated: true,
         error: null,
+      });
+    }
+  },
+
+  // Function to fetch user profile details from the backend
+  fetchUserProfile: async () => {
+    try {
+      const response = await axios.get(`${ROOT_URL}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      set({ user: response.data, isAuthenticated: true }); // Store fetched user data
+      localStorage.setItem("user", JSON.stringify(response.data)); // Store user data in localStorage
+    } catch (error) {
+      console.error("Failed to fetch user profile", error);
+      set({ error: "Failed to fetch profile" });
+    }
+  },
+
+  // Function to update user profile picture
+  updateUserProfilePicture: async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("profilePicture", file);
+
+      const response = await axios.post(
+        `${ROOT_URL}/api/users/update-profile-picture`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // Update the profile picture in the state
+      set({ user: { ...response.data }, isAuthenticated: true, error: null });
+      localStorage.setItem("user", JSON.stringify(response.data)); // Store updated user data in localStorage
+    } catch (err) {
+      set({
+        error:
+          err.response?.data?.message || "Failed to update profile picture",
       });
     }
   },

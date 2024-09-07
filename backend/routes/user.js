@@ -4,7 +4,7 @@ const { protect } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // Protect route to ensure only logged-in users can access
-router.get("/profile", protect, getUser);
+router.get("/me", protect, getUser);
 
 // Protect route for updating profile picture
 router.put("/profile/picture", protect, updateUserProfilePicture);
