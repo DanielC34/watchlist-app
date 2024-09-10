@@ -63,11 +63,11 @@ const Home = () => {
   return (
     <>
       <Container maxW="container.xl">
-        <Flex alignItems="baseline" gap="4" my="10">
+        <Flex alignItems="center" justifyContent="center" my="10">
           <FormControl>
             <FormLabel>Find out what is trending</FormLabel>
             <Select
-              w="200px"
+              w={{ base: "100%", md: "200px" }} // Responsive width for Select component
               value={timeframe}
               onChange={handleTimeframeChange}
             >
@@ -79,18 +79,20 @@ const Home = () => {
       </Container>
 
       {/* Display fetched trending data as cards */}
-
       {loading ? (
         <Loading />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <Flex flexWrap="wrap" justifyContent="center" p="4">
           {trending.map((item) => (
             <Link
               to={`/details/${item.id}`}
               state={{ type: item.media_type }}
               key={item.id}
             >
-              <div className="movie-card border rounded-lg shadow-lg p-2">
+              <div
+                className="movie-card border rounded-lg shadow-lg p-2"
+                style={{ maxWidth: "300px" }}
+              >
                 <img
                   src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
                   alt={item.title || item.name}
@@ -105,7 +107,7 @@ const Home = () => {
               </div>
             </Link>
           ))}
-        </div>
+        </Flex>
       )}
 
       {/* Pagination controls */}

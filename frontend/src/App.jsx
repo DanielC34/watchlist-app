@@ -14,9 +14,14 @@ function App() {
 
   return (
     <div className="flex h-screen bg-gray-900 text-white">
+      {/* Navbar is hidden on small screens by default */}
       <Navbar />
-      <div className="flex-1 flex flex-col">
+
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col overflow-auto">
         <Header />
+
+        {/* Content Area */}
         <div className="p-4 flex flex-col space-y-4 bg-gray-900 text-white">
           <Outlet />
         </div>
