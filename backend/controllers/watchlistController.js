@@ -1,5 +1,39 @@
 const Watchlist = require("../models/Watchlist");
 
+exports.createWatchlist = async (req, res) => {
+  try {
+    //Extract user ID
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({message: "Authorization Required"});
+    }
+
+    //Validate the request body
+    const { watchlistName } = req.body;
+    if (!watchlistName || watchlistName.trim() === "") {
+      return res.status(400).json({ message: "Watchlist name is required." });
+    }
+    
+    //Create a new watchlist instance
+    const newWatchlist = new Watchlist({
+      userId: userId,
+      name: watchlistName,
+      items: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    //Save the new watchlist instance to the database
+    await newWatchlist.save();
+    return res.status(201).json(newWatchlist);
+
+  } catch (err) {
+    console.error(err);
+    //Catch any other errors
+    console1004.REST.
+  }
+}
+
 //Function to get watchlist from database
 exports.getWatchlist = async (req, res) => {
   const userId = req.user.id; // Extract the user ID from the request object to find user's desired watchlist
@@ -44,7 +78,7 @@ exports.addToWatchlist = async (req, res) => {
 };
 
 // Delete an item from the watchlist
-exports.removeFromWatchlist = async (req, res) => {
+exports.removeWatchlist = async (req, res) => {
   const { movieId, type } = req.body;
   const userId = req.user.id;
   try {

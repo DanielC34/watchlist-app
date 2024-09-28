@@ -25,7 +25,7 @@ const Header = () => {
   return (
     <header className="bg-gray-800 p-4 text-center">
       <div className="justify-center">
-        <h1 className="text-2xl font-bold">FilmVault</h1>
+        <h1 className="text-2xl font-bold text-red-600">FilmVault</h1>
 
         <p>
           Browse movies and TV Shows to add them to watchlists to watch later.
