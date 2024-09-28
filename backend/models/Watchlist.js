@@ -7,22 +7,33 @@ const WatchlistSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    movies: [
+    name: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
+    items: [
       {
         type: String,
-        required: true,
+        name: String,
+        poster: String,
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
-    tvShows: [
-      {
-        type: String,
-        required: true,
-      },
-    ],
-  },
-  {
-    timestamps: true,
-  }
-);
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+  });
 
 module.exports = mongoose.model("Watchlist", WatchlistSchema);
