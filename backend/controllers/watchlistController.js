@@ -30,7 +30,8 @@ exports.createWatchlist = async (req, res) => {
   } catch (err) {
     console.error(err);
     //Catch any other errors
-    console1004.REST.
+    console.error(err);
+    return res.status(500).json({message: "An unexpected error occurred"});
   }
 }
 
