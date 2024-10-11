@@ -46,34 +46,61 @@ exports.getWatchlist = async (req, res) => {
   }
 };
 
-// Add an item to the watchlist
-exports.addToWatchlist = async (req, res) => {
+// Function to Add an item to the watchlist
+exports.addItemToWatchlist = async (req, res) => {
   try {
-    //Check if item already exists in user's watchlist by searching with userId and movieId
-    const existingItem = await Watchlist.findOne({ userId: req.userId, movieId: req.movieId });
-    
-    //Returns error message if item already exists in user's watchlist
-    if (existingItem) {
-      return res.status(400).json({ message: 'Item already in watchlist' });
+    //  Extract user ID (assuming authentication middleware has set req.user)
+    const userId = req.user.id;
+    // Check if user is authorized, else return unauthorized error
+    if (!userId) {
+      return res.status(401).json({ message: "Authorization Required" });
     }
-    
-    //Otherwise, create a new watchlist item with the details provided in the request
-    const newWatchlistItem = new Watchlist({
-      userId: req.userId,
-      movieId: req.movieId,
-      title: req.title,
-      type: req.type,
-      poster: req.poster,
-      releaseDate: req.releaseDate,
-      overview: req.overview
+
+    // Extract watchlistId and item from request body
+    const { watchlistId, item } = req.body;
+    //Check if both watchlistId and item are provided
+    if (!watchlistId || !item) {
+      return res
+        .status(400)
+        .json({ message: "Watchlist ID and item are required" });
+    }
+
+    // Find the watchlist that belongs to the user
+    const watchlist = await Watchlist.findOne({
+      _id: watchlistId,
+      userId: userId,
     });
-    
-    //Save the new watchlist item to the database
-    await newWatchlistItem.save();
-    
-    //Respond with a 201 status and newly created watchlist item
-    res.status(201).json(newWatchlistItem);
+    //If watchlist is not found, return a 404 error
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    // Check if the item already exists in the watchlist to avoid duplication
+    const itemExists = watchlist.items.some(
+      (watchlistItem) => watchlistItem.id === item.id
+    );
+    //If item exists return conflict error
+    if (itemExists) {
+      return res
+        .status(409)
+        .json({ message: "Item already exists in the watchlist" });
+    }
+
+    // If item doesn't exist, add it to the watchlist's items array
+    watchlist.items.push(item);
+    // Update the updatedAt field to reflect the modification
+    watchlist.updatedAt = new Date();
+
+    // Save the updated watchlist
+    await watchlist.save();
+
+    // Return success response
+    return res.status(200).json({
+      message: "Item added to watchlist successfully",
+      watchlist,
+    });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Failed to add to watchlist", error }); // If there is an error during the process, respond with a 500 status and an error message
   }
 };
