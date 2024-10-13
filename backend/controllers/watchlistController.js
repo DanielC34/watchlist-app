@@ -51,35 +51,31 @@ exports.addItemToWatchlist = async (req, res) => {
   try {
     //  Extract user ID (assuming authentication middleware has set req.user)
     const userId = req.user.id;
-    // Check if user is authorized, else return unauthorized error
     if (!userId) {
       return res.status(401).json({ message: "Authorization Required" });
     }
 
-    // Extract watchlistId and item from request body
+    // Extract watchlistId and item from request body and check if both watchlistId and item are provided
     const { watchlistId, item } = req.body;
-    //Check if both watchlistId and item are provided
     if (!watchlistId || !item) {
       return res
         .status(400)
         .json({ message: "Watchlist ID and item are required" });
     }
 
-    // Find the watchlist that belongs to the user
+    // Find the watchlist that belongs to the user. If watchlist is not found, return a 404 error
     const watchlist = await Watchlist.findOne({
       _id: watchlistId,
       userId: userId,
     });
-    //If watchlist is not found, return a 404 error
     if (!watchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    // Check if the item already exists in the watchlist to avoid duplication
+    // Check if the item already exists in the watchlist to avoid duplication. Returns error if item exists already
     const itemExists = watchlist.items.some(
       (watchlistItem) => watchlistItem.id === item.id
     );
-    //If item exists return conflict error
     if (itemExists) {
       return res
         .status(409)
@@ -104,6 +100,55 @@ exports.addItemToWatchlist = async (req, res) => {
     res.status(500).json({ message: "Failed to add to watchlist", error }); // If there is an error during the process, respond with a 500 status and an error message
   }
 };
+
+//Update an existing watchlist
+exports.updateWatchlist = async (req, res) => {
+  try {
+    //  Extract user ID (assuming authentication middleware has set req.user), otherwise returns error if user is not authenticated
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authorization Required" });
+    }
+  
+    const { watchlistId, newWatchlistName } = req.body;
+  
+    //Check if both watchlistId and newWatchlistName are provided
+    if (!watchlistId || !newWatchlistName || newWatchlistName.trim() === "") {
+      return res
+        .status(400)
+        .json({ message: "Watchlist ID and new name are required" });
+    }
+  
+    //Find the watchlist that belongs to the user
+    const watchlist = await Watchlist.findOne({
+      _id: watchlistId,
+      userId: userId,
+    });
+  
+    // If watchlist is not found, return a 404 error
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+  
+    // Update the watchlist name and updatedAt field
+    watchlist.name = newWatchlistName;
+    watchlist.updatedAt = new Date();
+  
+    //Save the updated watchlist
+    await watchlist.save();
+    
+    //Return success response
+    return res.status(200).json({
+      message: "Watchlist updated successfully",
+      watchlist,
+    });
+  } catch (error) {
+    // Handle any unexpected errors
+    console.error(error);
+    return res.status(500).json({ message: "An unexpected error occurred" });
+  }
+
+}
 
 // Delete an item from the watchlist
 exports.removeWatchlist = async (req, res) => {
