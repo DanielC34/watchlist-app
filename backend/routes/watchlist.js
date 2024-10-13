@@ -2,7 +2,7 @@ const express = require("express");
 const {
   getWatchlist,
   addItemToWatchlist,
-  removeWatchlist,
+  deleteWatchlist,
   removeItemFromWatchlist,
   createWatchlist,
   updateWatchlist,
@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.get("/", auth, getWatchlist); // GET: Get all watchlists for user (if they exist)
 router.post("/", auth, addItemToWatchlist); //POST: Create a new watchlist
-router.delete("/:id", auth, removeWatchlist); //DELETE: Delete a watchlist by ID
+router.delete("/:id", auth, deleteWatchlist); //DELETE: Delete a watchlist by ID
 router.put("/:id", auth, updateWatchlist); //PUT: Update an existing watchlist
 router.delete(
   "/:id/remove-item/:itemId",
