@@ -228,42 +228,42 @@ exports.removeItemFromWatchlist = async (req, res) => {
 };
 
 // // Check if the item exists in the watchlist
-// exports.checkItemInWatchlist = async (req, res) => {
-//   try {
-//     // Extract user ID (assuming authentication middleware has set req.user)
-//     const userId = req.user.id;
-//     if (!userId) {
-//       return res.status(401).json({ message: "Authorization Required" });
-//     }
+exports.checkItemInWatchlist = async (req, res) => {
+  try {
+    // Extract user ID (assuming authentication middleware has set req.user)
+    const userId = req.user.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authorization Required" });
+    }
 
-//     // Extract watchlistId and itemId from request body
-//     const { watchlistId, itemId } = req.body;
-//     if (!watchlistId || !itemId) {
-//       return res.status(400).json({ message: "Watchlist ID and Item ID are required" });
-//     }
+    // Extract watchlistId and itemId from request body
+    const { watchlistId, itemId } = req.body;
+    if (!watchlistId || !itemId) {
+      return res.status(400).json({ message: "Watchlist ID and Item ID are required" });
+    }
 
-//     // Find the watchlist that belongs to the user
-//     const watchlist = await Watchlist.findOne({
-//       _id: watchlistId,
-//       userId: userId,
-//     });
+    // Find the watchlist that belongs to the user
+    const watchlist = await Watchlist.findOne({
+      _id: watchlistId,
+      userId: userId,
+    });
 
-//     // Check if the watchlist exists
-//     if (!watchlist) {
-//       return res.status(404).json({ message: "Watchlist not found" });
-//     }
+    // Check if the watchlist exists
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
 
-//     // Check if the item exists in the watchlist
-//     const itemExists = watchlist.items.some(item => item.id === itemId);
+    // Check if the item exists in the watchlist
+    const itemExists = watchlist.items.some(item => item.id === itemId);
 
-//     if (itemExists) {
-//       return res.status(200).json({ message: "Item exists in the watchlist", exists: true });
-//     } else {
-//       return res.status(200).json({ message: "Item does not exist in the watchlist", exists: false });
-//     }
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: "Failed to check item in watchlist", error });
-//   }
-// };
+    if (itemExists) {
+      return res.status(200).json({ message: "Item exists in the watchlist", exists: true });
+    } else {
+      return res.status(200).json({ message: "Item does not exist in the watchlist", exists: false });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to check item in watchlist", error });
+  }
+};
 
