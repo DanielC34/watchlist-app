@@ -16,7 +16,7 @@ exports.createWatchlist = async (req, res) => {
 
     //Create a new watchlist instance
     const newWatchlist = new Watchlist({
-      userId: userId,
+      user: userId,
       name: watchlistName,
       items: [],
       createdAt: new Date(),
@@ -156,14 +156,14 @@ exports.deleteWatchlist = async (req, res) => {
       return res.status(401).json({ message: "Authorization Required" });
     }
     //Validate request parameters (watchlistId)
-    const { watchlistId } = req.params;
-    if (!watchlistId) {
+    const { id } = req.params;
+    if (!id) {
       return res.status(400).json({ message: "Watchlist ID is missing" });
     }
 
     //Find the watchlist that belongs to the user
     const watchlist = await Watchlist.findOne({
-      _id: watchlistId,
+      _id: id,
       userId: userId,
     });
     // If watchlist is not found, return a 404 error
@@ -178,4 +178,92 @@ exports.deleteWatchlist = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Failed to delete watchlist", error });
   }
+}
+
+// Remove an item off the watchlist
+exports.removeItemFromWatchlist = async (req, res) => {
+  const userId = req.user.id; // Get the user ID from the request
+
+  try {
+    // Check if the user ID is present
+    if (!userId) {
+      return res.status(401).json({ message: "Authorization Required" });
+    }
+
+    const { id: watchlistId, itemId } = req.params; // Extract watchlist ID and item ID from route params
+
+    // Check if watchlist ID and item ID are provided
+    if (!watchlistId || !itemId) {
+      return res.status(400).json({ message: "Watchlist ID and Item ID are required" });
+    }
+
+    // Find the watchlist that belongs to the user
+    const watchlist = await Watchlist.findOne({
+      _id: watchlistId,
+      userId: userId,
+    });
+
+    // Check if the watchlist exists
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    // Filter out the item to remove it from the watchlist
+    watchlist.items = watchlist.items.filter(item => item.id !== itemId);
+    watchlist.updatedAt = new Date(); // Update the watchlist's updatedAt field
+
+    // Save the updated watchlist
+    await watchlist.save();
+
+    // Respond with success message and the updated watchlist
+    return res.status(200).json({
+      message: "Item removed from watchlist successfully",
+      watchlist,
+    });
+  } catch (error) {
+    console.error(error);
+    // Handle any errors that occur during the process
+    res.status(500).json({ message: "Failed to remove item from watchlist", error });
+  }
 };
+
+// // Check if the item exists in the watchlist
+// exports.checkItemInWatchlist = async (req, res) => {
+//   try {
+//     // Extract user ID (assuming authentication middleware has set req.user)
+//     const userId = req.user.id;
+//     if (!userId) {
+//       return res.status(401).json({ message: "Authorization Required" });
+//     }
+
+//     // Extract watchlistId and itemId from request body
+//     const { watchlistId, itemId } = req.body;
+//     if (!watchlistId || !itemId) {
+//       return res.status(400).json({ message: "Watchlist ID and Item ID are required" });
+//     }
+
+//     // Find the watchlist that belongs to the user
+//     const watchlist = await Watchlist.findOne({
+//       _id: watchlistId,
+//       userId: userId,
+//     });
+
+//     // Check if the watchlist exists
+//     if (!watchlist) {
+//       return res.status(404).json({ message: "Watchlist not found" });
+//     }
+
+//     // Check if the item exists in the watchlist
+//     const itemExists = watchlist.items.some(item => item.id === itemId);
+
+//     if (itemExists) {
+//       return res.status(200).json({ message: "Item exists in the watchlist", exists: true });
+//     } else {
+//       return res.status(200).json({ message: "Item does not exist in the watchlist", exists: false });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: "Failed to check item in watchlist", error });
+//   }
+// };
+
