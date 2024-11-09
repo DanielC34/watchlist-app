@@ -1,5 +1,7 @@
 const Watchlist = require("../models/Watchlist");
 
+//Function to create watchlist
+// createWatchlist url: http://localhost:5000/api/watchlist/create (provide watchlistName in body as input)
 exports.createWatchlist = async (req, res) => {
   try {
     //Extract user ID
@@ -35,10 +37,11 @@ exports.createWatchlist = async (req, res) => {
 };
 
 //Function to get watchlist from database
+// getWatchlist url: http://localhost:5000/api/watchlist/{ID of watchlist to be fetched}
 exports.getWatchlist = async (req, res) => {
   const userId = req.user.id; // Extract the user ID from the request object to find user's desired watchlist
   try {
-    const watchlist = await Watchlist.findOne({ userId }); // Fetch the watchlist for the given user ID from the database
+    const watchlist = await Watchlist.findOne({ user: userId }); // Fetch the watchlist for the given user ID from the database
     res.json(watchlist); // Send the retrieved watchlist as a JSON response
   } catch (err) {
     res.status(500).json({ error: "Server error" }); //Handle any errors that occur during the database query
@@ -46,6 +49,7 @@ exports.getWatchlist = async (req, res) => {
 };
 
 // Function to Add an item to the watchlist
+// AddItemToWatchlist url: http://localhost:5000/api/watchlist/{ID of item to be added}/add-item
 exports.addItemToWatchlist = async (req, res) => {
   try {
     //  Extract user ID (assuming authentication middleware has set req.user)
@@ -122,6 +126,7 @@ exports.addItemToWatchlist = async (req, res) => {
 };
 
 //Update an existing watchlist
+//UpdateWatchlist url: http://localhost:5000/api/watchlist/update (watchlistId and newWatchlistName serve as input)
 exports.updateWatchlist = async (req, res) => {
   try {
     //  Extract user ID (assuming authentication middleware has set req.user), otherwise returns error if user is not authenticated
@@ -142,7 +147,7 @@ exports.updateWatchlist = async (req, res) => {
     //Find the watchlist that belongs to the user
     const watchlist = await Watchlist.findOne({
       _id: watchlistId,
-      userId: userId,
+      user: userId,
     });
 
     // If watchlist is not found, return a 404 error
@@ -169,7 +174,8 @@ exports.updateWatchlist = async (req, res) => {
   }
 };
 
-// Delete the watchlist
+// Delete the watchlist. 
+//DeleteWatchlist url: http://localhost:5000/api/watchlist/{ID of watchlist to be deleted}
 exports.deleteWatchlist = async (req, res) => {
   const userId = req.user.id;
   try {
@@ -202,6 +208,7 @@ exports.deleteWatchlist = async (req, res) => {
 }
 
 // Remove an item off the watchlist
+//DeleteItemFromWatchlist url: http://localhost:5000/api/watchlist/{ID of watchlist}/remove-item/{ID of item to be removed}
 exports.removeItemFromWatchlist = async (req, res) => {
   const userId = req.user.id; // Get the user ID from the request
 
