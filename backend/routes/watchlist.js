@@ -22,6 +22,6 @@ router.delete(
   removeItemFromWatchlist
 ); //DELETE: Delete an item off the watchlist by ID
 router.post("/create", auth, createWatchlist);
-// router.get("/:id/check-item/:itemId", auth, checkItemInWatchlist); //GET: check if specific item is in watchlist
+router.get("/:id/check-item/:itemId", auth, checkItemInWatchlist); //GET: check if specific item is in watchlist
 
 module.exports = router;
