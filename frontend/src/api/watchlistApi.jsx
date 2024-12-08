@@ -2,6 +2,7 @@ import axios from 'axios';
 
 const BASE_URL = "http://localhost:5000/api";
 
+//Function to create a new watchlist by sending a POST request
 export const createWatchlistAPI = async (watchlistName) => {
     try {
         const response = await axios.post(`${BASE_URL}/watchlist/create`,
@@ -16,6 +17,7 @@ export const createWatchlistAPI = async (watchlistName) => {
      }
 };
 
+//Function to add a new watchlist by sending a POST request
 export const addItemToWatchlist = async (watchlistId, item) => {
     try {
         const response = await axios.post(`${BASE_URL}/watchlist/${watchlistId}/add-item`, item)
@@ -26,6 +28,7 @@ export const addItemToWatchlist = async (watchlistId, item) => {
      }
 }
 
+//Function to fetch watchlist by sending a GET request
 export const getWatchlistAPI = async () => {
     try {
         const response = await axios.get(`${BASE_URL}/watchlist/create`);
@@ -36,6 +39,7 @@ export const getWatchlistAPI = async () => {
     }
 }
 
+//Function to update watchlist by sending a PUT request
 export const updateWatchlistAPI = async (watchlistId, newWatchlistName) => {
     try {
         const response = await axios.put(`${BASE_URL}/watchlist/update`, 
@@ -50,6 +54,7 @@ export const updateWatchlistAPI = async (watchlistId, newWatchlistName) => {
      }
 }
  
+//Function to delete watchlist by sending a DELETE request
 export const deleteWatchlistAPI = async (watchlistId) => {
     try {
         const response = await axios.delete(`${BASE_URL}/watchlist/${watchlistId}`);
@@ -59,7 +64,8 @@ export const deleteWatchlistAPI = async (watchlistId) => {
         throw error;
     }
 }
- 
+
+//Function to remove item from watchlist by sending a DELETE request
 export const removeItemFromWatchlistAPI = async (watchlistId, itemId) => {
     try {
         const response = await axios.delete(`${BASE_URL}/watchlist/${watchlistId}/remove-item/${itemId}`);
