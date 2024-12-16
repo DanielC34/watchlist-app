@@ -1,8 +1,8 @@
 import { Container, Box } from "@chakra-ui/react";
 import React from "react";
 
-const CreatedList = () => {
+const Watchlist = () => {
   return <div>My watchlist comes here</div>;
 };
 
-export default CreatedList;
+export default Watchlist;

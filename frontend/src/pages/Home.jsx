@@ -1,4 +1,4 @@
-import { Container, Flex, FormLabel, FormControl, Select, Button } from '@chakra-ui/react'
+import { Container, Flex, FormLabel, FormControl, Select, Button, Heading } from '@chakra-ui/react'
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -63,6 +63,7 @@ const Home = () => {
   return (
     <>
       <Container maxW="container.xl">
+        <Heading>Home</Heading>
         <Flex alignItems="center" justifyContent="center" my="10">
           <FormControl>
             <FormLabel>Find out what is trending</FormLabel>
