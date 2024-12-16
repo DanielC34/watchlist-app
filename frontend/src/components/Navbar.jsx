@@ -31,7 +31,6 @@ const Navbar = () => {
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 p-4 flex flex-col space-y-4 z-50 w-64`}
       >
-
         {/* Header with Brand and Close Button */}
         <div className="flex items-center justify-between md:hidden">
           <div className="text-2xl font-bold text-red-500">FilmVault</div>
@@ -64,7 +63,7 @@ const Navbar = () => {
             <FaHistory />
             <span>History</span>
           </Link>
-          <Link to="/watchlist">
+          <Link to="/create-watchlist">
             <Button
               colorScheme="red"
               variant="solid"

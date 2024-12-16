@@ -17,11 +17,11 @@ import {
 } from "react-router-dom";
 import pageTheme from '../pageTheme.js';
 import Profile from "./pages/profile/Profile.jsx";
-import Watchlist from "./pages/watchlist/Watchlist.jsx";
+import CreateWatchlist from "./pages/watchlist/CreateWatchlist.jsx";
 import History from './pages/history/History.jsx';
-import CreatedList from './pages/createdlist/CreatedList.jsx';
 import Login from './pages/login/Login.jsx';
 import Signup from './pages/signup/Signup.jsx'
+import Watchlist from "./pages/watchlist/CreateWatchlist.jsx";
 
 const router = createBrowserRouter([
   {
@@ -49,12 +49,12 @@ const router = createBrowserRouter([
         element: <Profile />,
       },
       {
-        path: "/watchlist",
-        element: <Watchlist />,
+        path: "/create-watchlist",
+        element: <CreateWatchlist />,
       },
       {
-        path: "/createlist",
-        element: <CreatedList />,
+        path: "/watchlist",
+        element: <Watchlist />,
       },
       {
         path: "/history",
