@@ -13,7 +13,7 @@ import {useWatchlistStore}  from "../../store/useWatchlistStore";
 
 const CreateWatchlist = () => {
   // State to manage the inputs for name and description
-  const [name, setName] = useState("");
+  const [watchlistName, setWatchlistName] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -26,8 +26,8 @@ const CreateWatchlist = () => {
   const handleCreateWatchlist = async () => {
     setLoading(true);
 
-    // Input validation
-    if (!name) {
+    // Input validation (if name is empty)
+    if (!watchlistName) {
       toast({
         title: "Error",
         description: "Please provide a name for the watchlist.",
@@ -36,12 +36,40 @@ const CreateWatchlist = () => {
         isClosable: true,
       });
       setLoading(false);
-      return;
+      return; //stop further execution
+    }
+
+    //Error check for number of characters in watchlist name
+    if (watchlistName.length < 10 || watchlistName.length > 100) {
+      toast({
+        title: "Error",
+        description: "Watchlist name must be between 50 and 100 characters.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return; //stop further execution
+    }
+
+    //Error check for number of characters in watchlist description
+    if (description && (description.length < 10 || description.length > 300)) {
+      toast({
+        title: "Error",
+        description:
+          "Watchlist description must be between 200 and 300 characters.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return; //stop further execution
     }
 
     try {
       // Create the watchlist by calling the store function
-      await createWatchlist(name, description || ""); // Description is optional
+      await createWatchlist(watchlistName, description || ""); // Description is optional
+
       toast({
         title: "Success",
         description: "Your watchlist has been created.",
@@ -51,7 +79,7 @@ const CreateWatchlist = () => {
       });
 
       // Reset input fields
-      setName("");
+      setWatchlistName("");
       setDescription("");
     } catch (error) {
       console.error("Error creating watchlist:", error); // Log the error to the console
@@ -89,20 +117,23 @@ const CreateWatchlist = () => {
 
       {/* Watchlist Name */}
       <FormControl isRequired marginBottom="4">
-        <FormLabel fontWeight="bold" color="white">
+        <FormLabel fontWeight="bold" color="white" htmlFor="watchlistName">
           Watchlist Name
         </FormLabel>
         <Input
           placeholder="Example: My Favorites, Top Movies..."
           size="lg"
+          id="watchlistName"
+          type="text"
+          value={watchlistName}
           mb={4}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setWatchlistName(e.target.value)}
         />
       </FormControl>
 
       {/* Watchlist Description */}
       <FormControl marginBottom="6">
-        <FormLabel fontWeight="bold" color="white">
+        <FormLabel fontWeight="bold" color="white" htmlFor="description">
           Watchlist Description{" "}
           <span style={{ fontWeight: "normal", fontSize: "sm" }}>
             (Optional)
@@ -110,6 +141,9 @@ const CreateWatchlist = () => {
         </FormLabel>
         <Textarea
           placeholder="Describe the watchlist content..."
+          value={description}
+          id="description"
+          type="text"
           size="lg"
           onChange={(e) => setDescription(e.target.value)}
         />

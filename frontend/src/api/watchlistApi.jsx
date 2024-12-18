@@ -3,11 +3,12 @@ import axios from 'axios';
 const BASE_URL = "http://localhost:5000/api";
 
 //Function to create a new watchlist by sending a POST request
-export const createWatchlistAPI = async (watchlistName) => {
+export const createWatchlistAPI = async (watchlistName, description) => {
     try {
         const response = await axios.post(`${BASE_URL}/watchlist/create`,
             {
-                name: watchlistName 
+                name: watchlistName,
+                description
                 
             });
         return response.data //Contains new watchlist data

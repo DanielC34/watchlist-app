@@ -26,11 +26,12 @@ export const useWatchlistStore = create((set) => ({
          }
     },
 
-    createWatchlist: async (watchlistName) => {
+    createWatchlist: async (watchlistName, description) => {
         try {
             set({ loading: true });
-            const newWatchlist = await createWatchlistAPI(watchlistName); //create a new watchlist
+            const newWatchlist = await createWatchlistAPI(watchlistName, description); //create a new watchlist
             set((state) => ({ watchlist: [...state.watchlist, newWatchlist], loading: false })); //add the new watchlist to the watchlist array
+            return newWatchlist;
         } catch (error) {
             set({ error: error.message, loading: false }); //catch any other errors
         }

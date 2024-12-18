@@ -11,15 +11,34 @@ exports.createWatchlist = async (req, res) => {
     }
 
     //Validate the request body
-    const { watchlistName } = req.body;
-    if (!watchlistName || watchlistName.trim() === "") {
-      return res.status(400).json({ message: "Watchlist name is required." });
+    const { watchlistName, description } = req.body;
+
+    // Check if `watchlistName` exists and meets length requirements
+    if (
+      !watchlistName ||
+      watchlistName.trim().length < 10 ||
+      watchlistName.trim().length > 100
+    ) {
+      return res.status(400).json({
+        message: "Watchlist name must be between 50 and 100 characters.",
+      });
+    }
+
+    // Validate `description` (optional field but must meet length constraints if provided)
+    if (
+      description &&
+      (description.trim().length < 10 || description.trim().length > 300)
+    ) {
+      return res.status(400).json({
+        message: "Description must be between 200 and 300 characters.",
+      });
     }
 
     //Create a new watchlist instance
     const newWatchlist = new Watchlist({
       user: userId,
-      name: watchlistName,
+      name: watchlistName.trim(),
+      description: description?.trim() || "",
       items: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -27,6 +46,8 @@ exports.createWatchlist = async (req, res) => {
 
     //Save the new watchlist instance to the database
     await newWatchlist.save();
+
+    //Send success response with created watchlist
     return res.status(201).json(newWatchlist);
   } catch (err) {
     console.error(err);
