@@ -1,8 +1,12 @@
-// Import required modules
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Avatar,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
   Button,
   Input,
   FormControl,
@@ -10,98 +14,246 @@ import {
   useToast,
   Text,
   VStack,
+  useDisclosure,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  Flex,
 } from "@chakra-ui/react";
+import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
 
 const Profile = () => {
-  // Initialize state from the Auth Store
-  const { user, fetchUserProfile, updateUserProfilePicture, checkAuthOnLoad } =
-    useAuthStore((state) => ({
-      user: state.user,
-      fetchUserProfile: state.fetchUserProfile,
-      updateUserProfilePicture: state.updateUserProfilePicture,
-      checkAuthOnLoad: state.checkAuthOnLoad,
-    }));
+  // State for login form
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const [newProfilePicture, setNewProfilePicture] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // State for signup form
+  const [username, setUsername] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const navigate = useNavigate();
   const toast = useToast();
 
-  useEffect(() => {
-    checkAuthOnLoad();
-  }, [checkAuthOnLoad]);
+  // Initialize state from the Auth Store
+  const { user, login, signup, isAuthenticated, error, clearError } =
+    useAuthStore((state) => ({
+      user: state.user,
+      login: state.login,
+      signup: state.signup,
+      isAuthenticated: state.isAuthenticated,
+      error: state.error,
+      clearError: state.clearError,
+    }));
 
-  // Fetch user profile details when the component mounts
-  useEffect(() => {
-    if (!user?.username) {
-      // Update to ensure fetching only when user details are missing
-      fetchUserProfile();
-    }
-  }, [fetchUserProfile, user]);
-
-  // Handle profile picture change
-  const handleProfilePictureChange = (event) => {
-    setNewProfilePicture(event.target.files[0]); // Store the selected file
-  };
-
-  // Handle submission of updated profile picture
-  const handleSubmit = async () => {
-    if (!newProfilePicture) {
-      toast({
-        title: "Please select a picture to upload.",
-        status: "warning",
-        duration: 3000,
-      });
-      return;
-    }
-
-    setLoading(true); // Set loading state to true
+  // Handle login form submission
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      await updateUserProfilePicture(newProfilePicture); // Call API function to update the picture
+      await login(email, password);
+
+      // Check if login was successful
+      if (isAuthenticated) {
+        toast({
+          title: "Login successful.",
+          description: `Welcome back, ${user.username}`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+        onClose(); // Close the modal
+        navigate("/"); // Redirect to home page
+      }
+    } catch (err) {
       toast({
-        title: "Profile picture updated successfully!",
-        status: "success",
-        duration: 3000,
-      });
-    } catch (error) {
-      toast({
-        title: "Failed to update profile picture.",
+        title: "Error.",
+        description:
+          err.response?.data?.message || "Invalid email or password.",
         status: "error",
-        duration: 3000,
+        duration: 5000,
+        isClosable: true,
       });
-    } finally {
-      setLoading(false); // Reset loading state
     }
   };
+
+  // Handle signup form submission
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    try {
+      clearError();
+      await signup(username, signupEmail, signupPassword);
+
+      toast({
+        title: "Account created.",
+        description: `Welcome to FilmVault, ${username}`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+
+      onClose(); // Close the modal
+      navigate("/"); // Redirect to home page
+    } catch (err) {
+      toast({
+        title: "Error.",
+        description: err.response?.data?.message || "Something went wrong.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // Effect to open modal when navigated to /profile and not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      onOpen();
+    }
+  }, [isAuthenticated, onOpen]);
 
   return (
-    <Box
-      p={4}
-      bg="gray.700"
-      color="white"
-      maxWidth="400px"
-      mx="auto"
-      mt={6}
-      borderRadius="md"
-      boxShadow="md"
-    >
-      <VStack spacing={4}>
-        <Avatar size="xl" src={user?.profilePicture} />
-        <Text fontSize="lg" fontWeight="bold">
-          {user?.username || "Username not available"}
-        </Text>
-        <Text fontSize="md">{user?.email || "Email not available"}</Text>
+    <>
+      <Modal isOpen={isOpen} onClose={onClose} size="md">
+        <ModalOverlay />
+        <ModalContent bg="gray.800" color="white">
+          <ModalHeader fontSize="xl">Welcome to FilmVault</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Tabs isFitted variant="enclosed" colorScheme="red">
+              <TabList mb="1em">
+                <Tab>Login</Tab>
+                <Tab>Sign Up</Tab>
+              </TabList>
+              <TabPanels>
+                {/* Login Tab */}
+                <TabPanel>
+                  <form onSubmit={handleLogin}>
+                    <VStack spacing={4}>
+                      <FormControl isRequired>
+                        <FormLabel>Email</FormLabel>
+                        <Flex align="center">
+                          <FaEnvelope style={{ marginRight: "10px" }} />
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </Flex>
+                      </FormControl>
+                      <FormControl isRequired>
+                        <FormLabel>Password</FormLabel>
+                        <Flex align="center">
+                          <FaLock style={{ marginRight: "10px" }} />
+                          <Input
+                            type="password"
+                            placeholder="Enter your password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                          />
+                        </Flex>
+                      </FormControl>
+                      <Button
+                        type="submit"
+                        colorScheme="red"
+                        size="lg"
+                        w="full"
+                      >
+                        Login
+                      </Button>
+                    </VStack>
+                  </form>
+                </TabPanel>
 
-        <FormControl>
-          <FormLabel>Change Profile Picture</FormLabel>
-          <Input type="file" onChange={handleProfilePictureChange} />
-        </FormControl>
+                {/* Signup Tab */}
+                <TabPanel>
+                  <form onSubmit={handleSignup}>
+                    <VStack spacing={4}>
+                      <FormControl isRequired>
+                        <FormLabel>Username</FormLabel>
+                        <Flex align="center">
+                          <FaUser style={{ marginRight: "10px" }} />
+                          <Input
+                            type="text"
+                            placeholder="Enter your username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                          />
+                        </Flex>
+                      </FormControl>
+                      <FormControl isRequired>
+                        <FormLabel>Email</FormLabel>
+                        <Flex align="center">
+                          <FaEnvelope style={{ marginRight: "10px" }} />
+                          <Input
+                            type="email"
+                            placeholder="Enter your email"
+                            value={signupEmail}
+                            onChange={(e) => setSignupEmail(e.target.value)}
+                          />
+                        </Flex>
+                      </FormControl>
+                      <FormControl isRequired>
+                        <FormLabel>Password</FormLabel>
+                        <Flex align="center">
+                          <FaLock style={{ marginRight: "10px" }} />
+                          <Input
+                            type="password"
+                            placeholder="Enter your password"
+                            value={signupPassword}
+                            onChange={(e) => setSignupPassword(e.target.value)}
+                          />
+                        </Flex>
+                      </FormControl>
+                      <Button
+                        type="submit"
+                        colorScheme="red"
+                        size="lg"
+                        w="full"
+                      >
+                        Sign Up
+                      </Button>
+                    </VStack>
+                  </form>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-        <Button colorScheme="blue" onClick={handleSubmit} isLoading={loading}>
-          Save Changes
-        </Button>
-      </VStack>
-    </Box>
+      {/* Display user profile when authenticated */}
+      {isAuthenticated && (
+        <Box
+          p={4}
+          bg="gray.700"
+          color="white"
+          maxWidth="400px"
+          mx="auto"
+          mt={6}
+          borderRadius="md"
+          boxShadow="md"
+        >
+          <VStack spacing={4}>
+            <Avatar size="xl" src={user?.profilePicture} />
+            <Text fontSize="lg" fontWeight="bold">
+              {user?.username || "Username not available"}
+            </Text>
+            <Text fontSize="md">{user?.email || "Email not available"}</Text>
+          </VStack>
+        </Box>
+      )}
+    </>
   );
 };
 

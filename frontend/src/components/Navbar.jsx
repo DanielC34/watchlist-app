@@ -1,93 +1,230 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
-import { Divider, IconButton } from "@chakra-ui/react";
-import { FaHome, FaHistory, FaFilm, FaTv, FaPlus, FaTimes, FaBars } from "react-icons/fa";
-import { Button } from '@chakra-ui/react';
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Divider, IconButton, Box, Text, Flex } from "@chakra-ui/react";
+import {
+  FaHome,
+  FaHistory,
+  FaFilm,
+  FaTv,
+  FaPlus,
+  FaTimes,
+  FaBars,
+  FaSearch,
+} from "react-icons/fa";
+import { Button } from "@chakra-ui/react";
+import useAuthStore from "../store/useAuthStore";
+import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
-
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+   const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuthStore();
+
+  // Close sidebar when route changes (especially on mobile)
+  useEffect(() => {
+    setIsOpen(false);
+    document.body.classList.remove("overflow-hidden");
+  }, [location]);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-    document.body.classList.toggle('overflow-hidden');
+    if (!isOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
   };
+
+  // Function to handle login button click
+  const handleLoginClick = () => {
+    navigate("/profile");
+  };
+
+  // Check if the current path matches the link path
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // NavLink component for consistent styling
+  const NavLink = ({ to, icon, children }) => {
+    const active = isActive(to);
+    return (
+      <Link to={to} className="w-full">
+        <Flex
+          align="center"
+          py={2}
+          px={3}
+          borderRadius="md"
+          bg={active ? "rgba(229, 62, 62, 0.2)" : "transparent"}
+          color={active ? "red.400" : "white"}
+          _hover={{ bg: "rgba(229, 62, 62, 0.1)", color: "red.300" }}
+          transition="all 0.2s"
+        >
+          <Box mr={3}>{icon}</Box>
+          <Text fontWeight={active ? "bold" : "normal"}>{children}</Text>
+        </Flex>
+      </Link>
+    );
+  };
+
+  // Overlay for mobile
+  const MobileOverlay = () => (
+    <Box
+      display={{ base: isOpen ? "block" : "none", md: "none" }}
+      position="fixed"
+      top={0}
+      left={0}
+      right={0}
+      bottom={0}
+      bg="rgba(0, 0, 0, 0.7)"
+      zIndex={40}
+      onClick={toggleSidebar}
+    />
+  );
 
   return (
     <>
-      {/* Toggle Button for Small Screens */}
-      <div className="md:hidden flex items-center p-4 bg-gray-800 z-50">
+      {/* Mobile Header Bar */}
+      <Box
+        position="fixed"
+        top="0"
+        left="0"
+        right="0"
+        height="60px"
+        bg="gray.900"
+        display={{ base: "flex", md: "none" }}
+        alignItems="center"
+        px={4}
+        zIndex={30}
+        boxShadow="md"
+      >
         <IconButton
           aria-label={isOpen ? "Close Menu" : "Open Menu"}
           icon={isOpen ? <FaTimes /> : <FaBars />}
           onClick={toggleSidebar}
-          className="text-white"
+          colorScheme="red"
+          variant="ghost"
+          size="md"
         />
-      </div>
+        <Text fontSize="xl" fontWeight="bold" color="red.500" ml={4}>
+          FilmVault
+        </Text>
+      </Box>
+
+      {/* Mobile Overlay */}
+      <MobileOverlay />
 
       {/* Sidebar */}
-      <div
-        className={`fixed inset-y-0 left-0 transform ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0 transition-transform duration-200 ease-in-out bg-gray-800 p-4 flex flex-col space-y-4 z-50 w-64`}
+      <Box
+        position={{ base: "fixed", md: "sticky" }}
+        top="0"
+        left="0"
+        h="100vh"
+        w={{ base: "240px", md: "100%" }}
+        bg="gray.800"
+        transform={{
+          base: isOpen ? "translateX(0)" : "translateX(-100%)",
+          md: "translateX(0)",
+        }}
+        transition="transform 0.3s ease-in-out"
+        zIndex={50}
+        boxShadow={{ base: isOpen ? "2xl" : "none", md: "none" }}
+        overflowY="auto"
+        className="scrollbar-hide"
       >
-        {/* Header with Brand and Close Button */}
-        <div className="flex items-center justify-between md:hidden">
-          <div className="text-2xl font-bold text-red-500">FilmVault</div>
-          <IconButton
-            aria-label="Close Menu"
-            icon={<FaTimes />}
-            className="text-white"
-            onClick={toggleSidebar}
-          />
-        </div>
+        {/* Logo - only show on desktop or when mobile menu is open */}
+        <Flex
+          justify="center"
+          align="center"
+          py={6}
+          display={{ base: "none", md: "flex" }}
+        >
+          <Text fontSize="2xl" fontWeight="bold" color="red.500">
+            FilmVault
+          </Text>
+        </Flex>
 
         {/* Navigation Links */}
-        <nav className="flex-1 flex flex-col space-y-2 mt-4 md:mt-0">
-          <Link to="/" className="flex items-center space-x-2 text-white">
-            <FaHome />
-            <span>Home</span>
-          </Link>
-          <Link to="/movies" className="flex items-center space-x-2 text-white">
-            <FaFilm />
-            <span>Movies</span>
-          </Link>
-          <Link to="/shows" className="flex items-center space-x-2 text-white">
-            <FaTv />
-            <span>TV Shows</span>
-          </Link>
-          <Link
-            to="/history"
-            className="flex items-center space-x-2 text-white"
-          >
-            <FaHistory />
-            <span>History</span>
-          </Link>
-          <Link to="/create-watchlist">
+        <Box px={4} mb={6} mt={{ base: 6, md: 0 }}>
+          <NavLink to="/" icon={<FaHome />}>
+            Home
+          </NavLink>
+          <NavLink to="/movies" icon={<FaFilm />}>
+            Movies
+          </NavLink>
+          <NavLink to="/shows" icon={<FaTv />}>
+            TV Shows
+          </NavLink>
+          <NavLink to="/search" icon={<FaSearch />}>
+            Search
+          </NavLink>
+          <NavLink to="/history" icon={<FaHistory />}>
+            History
+          </NavLink>
+
+          <Box mt={4} mb={4}>
+            <Link to="/create-watchlist">
+              <Button
+                leftIcon={<FaPlus />}
+                colorScheme="red"
+                variant="solid"
+                size="sm"
+                width="100%"
+              >
+                Create Watchlist
+              </Button>
+            </Link>
+          </Box>
+        </Box>
+
+        <Divider />
+
+        {/* My Lists Section */}
+        <Box px={4} py={4}>
+          <Text fontWeight="bold" mb={2} color="gray.300">
+            MY LISTS
+          </Text>
+          {isAuthenticated ? (
+            <Box>
+              <Text fontSize="sm" color="gray.400" mb={2}>
+                {user.email}
+              </Text>
+              <Text fontSize="sm" color="gray.400" fontStyle="italic">
+                Your watchlists will appear here
+              </Text>
+            </Box>
+          ) : (
+            <Text fontSize="sm" color="gray.400" fontStyle="italic">
+              Login to see your watchlists
+            </Text>
+          )}
+        </Box>
+
+        {/* Footer with Login/Logout Button */}
+        <Box px={4} mt="auto" pb={6} position="sticky" bottom="0">
+          <Divider mb={4} />
+          {isAuthenticated ? (
+            <Button colorScheme="red" variant="outline" width="100%">
+              <Link to="/logout">Logout</Link>
+            </Button>
+          ) : (
             <Button
               colorScheme="red"
-              variant="solid"
-              className="w-full text-white"
+              variant="outline"
+              width="100%"
+              onClick={handleLoginClick}
             >
-              + Create Watchlist
+              Login
             </Button>
-          </Link>
-          <Divider orientation="horizontal" />
-          <h3 className="text-white">My Lists</h3>
-          <Link to="/createlist">
-            <span>{/* Add other details here if needed */}</span>
-          </Link>
-        </nav>
+          )}
+        </Box>
+      </Box>
 
-        {/* Footer with Login Button */}
-        <div className="mt-auto text-center">
-          <Button colorScheme="red" variant="solid">
-            <Link to="/login">Login</Link>
-          </Button>
-        </div>
-      </div>
+      {/* Content Spacer for Mobile */}
+      <Box height="60px" display={{ base: "block", md: "none" }} />
     </>
   );
-}
+};
 
-export default Navbar
+export default Navbar;
