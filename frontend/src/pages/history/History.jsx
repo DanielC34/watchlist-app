@@ -44,53 +44,58 @@ const History = () => {
   };
 
   return (
-    <div className="flex flex-col space-y-7 px-4">
-      <div className="flex justify-between items-center">
-        <h2 className="font-bold">Search</h2>
-        <Button colorScheme="red" variant="solid">
+    <div className="flex flex-col space-y-4 sm:space-y-7 px-2 sm:px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+        <h2 className="font-bold text-lg sm:text-xl">Search</h2>
+        <Button
+          colorScheme="red"
+          variant="solid"
+          size={{ base: "sm", md: "md" }}
+        >
           Clear History
         </Button>
       </div>
-      <div className="flex space-x-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
           placeholder="Search Movie/TV Show..."
           value={searchTerm}
           onChange={handleSearchChange}
           className="bg-gray-700"
+          size={{ base: "sm", md: "md" }}
         />
-        <Button colorScheme="red">
+        <Button
+          colorScheme="red"
+          size={{ base: "sm", md: "md" }}
+          width={{ base: "100%", sm: "auto" }}
+        >
           <FaSearch />
         </Button>
       </div>
       {loading ? (
         <Spinner size="xl" />
       ) : (
-        <Container maxW={"container.xl"}>
-          <Flex wrap="wrap" justify="center">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {searchResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="show-card border rounded-lg shadow-lg p-2 cursor-pointer"
-                  onClick={() =>
-                    handleResultClick(result.id, result.media_type)
-                  }
-                >
-                  <img
-                    src={`https://image.tmdb.org/t/p/w500${result.poster_path}`}
-                    alt={result.title || result.name}
-                    className="w-full h-auto rounded-md"
-                  />
-                  <h3 className="text-lg font-semibold mt-2">
-                    {result.title || result.name}
-                  </h3>
-                  <p className="text-sm">
-                    {result.release_date || result.first_air_date}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </Flex>
+        <Container maxW={"container.xl"} px={{ base: 0, md: 4 }}>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+            {searchResults.map((result) => (
+              <div
+                key={result.id}
+                className="show-card border rounded-lg shadow-lg p-2 cursor-pointer"
+                onClick={() => handleResultClick(result.id, result.media_type)}
+              >
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${result.poster_path}`}
+                  alt={result.title || result.name}
+                  className="w-full h-auto rounded-md"
+                />
+                <h3 className="text-sm sm:text-lg font-semibold mt-2 truncate">
+                  {result.title || result.name}
+                </h3>
+                <p className="text-xs sm:text-sm">
+                  {result.release_date || result.first_air_date}
+                </p>
+              </div>
+            ))}
+          </div>
         </Container>
       )}
     </div>

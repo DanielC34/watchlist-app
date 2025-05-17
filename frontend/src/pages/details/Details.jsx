@@ -101,38 +101,59 @@ const Details = () => {
   }
 
   return (
-    <Container maxW="container.lg" my="8">
-      <Button onClick={() => navigate(-1)} colorScheme="red" mb="4">
+    <Container
+      maxW="container.lg"
+      my={{ base: 4, md: 8 }}
+      px={{ base: 2, md: 4 }}
+    >
+      <Button
+        onClick={() => navigate(-1)}
+        colorScheme="red"
+        mb="4"
+        size={{ base: "sm", md: "md" }}
+      >
         Back
       </Button>
-      <Flex direction={{ base: "column", md: "row" }} gap="8">
-        <Box flexShrink="0">
+      <Flex direction={{ base: "column", md: "row" }} gap={{ base: 4, md: 8 }}>
+        <Box
+          flexShrink="0"
+          maxW={{ base: "100%", md: "300px" }}
+          mx={{ base: "auto", md: 0 }}
+        >
           <Image
             src={`https://image.tmdb.org/t/p/w500${details.poster_path}`}
             alt={details.title || details.name}
             borderRadius="md"
+            w="100%"
           />
         </Box>
         <Box>
-          <Heading as="h1" size="xl" mb="4">
+          <Heading as="h1" size={{ base: "lg", md: "xl" }} mb="4">
             {details.title || details.name}
           </Heading>
-          <Text fontSize="lg" mb="4">
+          <Text fontSize={{ base: "md", md: "lg" }} mb="4">
             {details.overview}
           </Text>
-          <Text>
+          <Text fontSize={{ base: "sm", md: "md" }}>
             <strong>Release Date:</strong>{" "}
             {details.release_date || details.first_air_date}
           </Text>
-          <Text>
+          <Text fontSize={{ base: "sm", md: "md" }}>
             <strong>Rating:</strong> {details.vote_average}
           </Text>
-          <Text>
+          <Text fontSize={{ base: "sm", md: "md" }}>
             <strong>Genres:</strong>{" "}
             {details.genres.map((genre) => genre.name).join(", ")}
           </Text>
           <div>
-            <Button colorScheme="red" mb="4" onClick={handleWatchlistToggle}>
+            <Button
+              colorScheme="red"
+              mt="4"
+              mb="4"
+              onClick={handleWatchlistToggle}
+              size={{ base: "sm", md: "md" }}
+              width={{ base: "100%", md: "auto" }}
+            >
               {isInWatchlist ? "- Remove from Watchlist" : "+ Add to Watchlist"}
             </Button>
           </div>

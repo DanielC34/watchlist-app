@@ -1,28 +1,29 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "./components/Navbar.jsx";
 import Header from "./components/Header";
 import useAuthStore from "./store/useAuthStore.jsx";
 
 function App() {
-  const checkAuthOnLoad = useAuthStore((state) => state.checkAuthOnLoad); // Access the checkAuthOnLoad function
+  const checkAuthOnLoad = useAuthStore((state) => state.checkAuthOnLoad);
 
-  // Run this code when the app first loads
   useEffect(() => {
-    checkAuthOnLoad(); // Check if the user is already logged in
-  }, []); // Empty dependency array means this runs only once on load
+    checkAuthOnLoad();
+  }, []);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
-      {/* Navbar is hidden on small screens by default */}
-      <Navbar />
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-900 text-white">
+      {/* Sidebar - fixed width on desktop, collapsible on mobile */}
+      <div className="md:w-64 md:flex-shrink-0">
+        <Navbar />
+      </div>
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-auto">
+      <div className="flex-1 overflow-auto">
         <Header />
 
         {/* Content Area */}
-        <div className="p-4 flex flex-col space-y-4 bg-gray-900 text-white">
+        <div className="p-4 bg-gray-900 text-white">
           <Outlet />
         </div>
       </div>
