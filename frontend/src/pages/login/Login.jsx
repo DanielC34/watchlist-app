@@ -46,7 +46,7 @@ const Login = () => {
           });
 
           // Redirecting to the movies page after successful login
-          navigate("/movies");
+          navigate("/");
         }
       }, 100); // Adjust delay as necessary
     } catch (error) {

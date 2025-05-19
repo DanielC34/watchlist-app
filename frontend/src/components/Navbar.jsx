@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Divider, IconButton, Box, Text, Flex } from "@chakra-ui/react";
+import { Divider, IconButton, Box, Text, Flex, Avatar } from "@chakra-ui/react";
 import {
   FaHome,
   FaHistory,
@@ -13,12 +13,12 @@ import {
 } from "react-icons/fa";
 import { Button } from "@chakra-ui/react";
 import useAuthStore from "../store/useAuthStore";
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
   // Close sidebar when route changes (especially on mobile)
@@ -186,24 +186,57 @@ const Navbar = () => {
             MY LISTS
           </Text>
           {isAuthenticated ? (
-            <Box>
-              <Text fontSize="sm" color="gray.400" mb={2}>
-                {user.email}
-              </Text>
-              <Text fontSize="sm" color="gray.400" fontStyle="italic">
-                Your watchlists will appear here
-              </Text>
-            </Box>
-          ) : (
             <Text fontSize="sm" color="gray.400" fontStyle="italic">
-              Login to see your watchlists
+              Your watchlists will appear here
             </Text>
+          ) : (
+            <Box>
+              <Text fontSize="sm" color="gray.400" fontStyle="italic" mb={2}>
+                Login to see your watchlists
+              </Text>
+              <Button
+                colorScheme="red"
+                size="sm"
+                width="100%"
+                onClick={handleLoginClick}
+              >
+                Login / Sign Up
+              </Button>
+            </Box>
           )}
         </Box>
 
         {/* Footer with Login/Logout Button */}
         <Box px={4} mt="auto" pb={6} position="sticky" bottom="0">
           <Divider mb={4} />
+
+          {/* User Profile Container - Moved here */}
+          {isAuthenticated && (
+            <Box
+              borderWidth="1px"
+              borderColor="gray.600"
+              borderRadius="md"
+              p={3}
+              bg="gray.700"
+              mb={4}
+              cursor="pointer"
+              onClick={() => navigate("/profile")}
+              _hover={{ bg: "gray.600", transition: "all 0.2s" }}
+            >
+              <Flex align="center">
+                <Avatar size="sm" name={user.username} mr={3} />
+                <Box>
+                  <Text fontSize="sm" fontWeight="medium" color="white">
+                    {user.username}
+                  </Text>
+                  <Text fontSize="xs" color="gray.400">
+                    {user.email}
+                  </Text>
+                </Box>
+              </Flex>
+            </Box>
+          )}
+
           {isAuthenticated ? (
             <Button colorScheme="red" variant="outline" width="100%">
               <Link to="/logout">Logout</Link>
@@ -215,7 +248,7 @@ const Navbar = () => {
               width="100%"
               onClick={handleLoginClick}
             >
-              Login
+              Login / Sign Up
             </Button>
           )}
         </Box>
