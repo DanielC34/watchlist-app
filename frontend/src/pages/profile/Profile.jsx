@@ -21,6 +21,8 @@ import {
   Tab,
   TabPanel,
   Flex,
+  Box,
+  Avatar,
 } from "@chakra-ui/react";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
