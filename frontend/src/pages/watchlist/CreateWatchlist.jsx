@@ -1,168 +1,118 @@
 import React, { useState } from "react";
 import {
+  Box,
   Button,
-  Input,
   FormControl,
   FormLabel,
+  Input,
   Textarea,
-  Box,
   Heading,
   useToast,
+  Container,
 } from "@chakra-ui/react";
-import {useWatchlistStore}  from "../../store/useWatchlistStore";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+// Import the API function instead of using axios directly
+import { createWatchlistAPI } from "../../api/watchlistApi";
+// Import the store to update state after creation
+import { useWatchlistStore } from "../../store/useWatchlistStore";
 
 const CreateWatchlist = () => {
-  // State to manage the inputs for name and description
-  const [watchlistName, setWatchlistName] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const toast = useToast();
+  const navigate = useNavigate();
 
-  // Using Zustand store for creating a watchlist
+  // Get the createWatchlist function from the store
   const createWatchlist = useWatchlistStore((state) => state.createWatchlist);
 
-  // Toast for displaying success or error messages
-  const toast = useToast();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const handleCreateWatchlist = async () => {
-    setLoading(true);
-
-    // Input validation (if name is empty)
-    if (!watchlistName) {
+    // Basic validation
+    if (!name.trim()) {
       toast({
-        title: "Error",
-        description: "Please provide a name for the watchlist.",
+        title: "Name is required",
         status: "error",
         duration: 3000,
         isClosable: true,
       });
-      setLoading(false);
-      return; //stop further execution
+      return;
     }
 
-    //Error check for number of characters in watchlist name
-    if (watchlistName.length < 10 || watchlistName.length > 100) {
-      toast({
-        title: "Error",
-        description: "Watchlist name must be between 50 and 100 characters.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setLoading(false);
-      return; //stop further execution
-    }
-
-    //Error check for number of characters in watchlist description
-    if (description && (description.length < 10 || description.length > 300)) {
-      toast({
-        title: "Error",
-        description:
-          "Watchlist description must be between 200 and 300 characters.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-      setLoading(false);
-      return; //stop further execution
-    }
+    setIsSubmitting(true);
 
     try {
-      // Create the watchlist by calling the store function
-      await createWatchlist(watchlistName, description || ""); // Description is optional
+      // Send request to create watchlist
+      // Use the store function instead of direct axios call
+      const newWatchlist = await createWatchlist(name, description);
 
+      // Show success message
       toast({
-        title: "Success",
-        description: "Your watchlist has been created.",
+        title: "Watchlist created!",
+        description: `"${name}" has been created successfully.`,
         status: "success",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
 
-      // Reset input fields
-      setWatchlistName("");
-      setDescription("");
+      // Navigate to the new watchlist
+      navigate(`/watchlist/${newWatchlist._id}`);
     } catch (error) {
-      console.error("Error creating watchlist:", error); // Log the error to the console
+      // Show error message
       toast({
-        title: "Error",
-        description:
-          "There was an issue creating the watchlist. Please try again.",
+        title: "Error creating watchlist",
+        description: error.response?.data?.message || "Something went wrong",
         status: "error",
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+      console.error("Create watchlist error:", error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Box
-      maxWidth="800px"
-      margin="0 auto"
-      padding="6"
-      borderRadius="md"
-      boxShadow="md"
-      backgroundColor="gray.700"
-    >
-      <Heading
-        as="h2"
-        size="lg"
-        marginBottom="6"
-        textAlign="center"
-        color="white"
+    <Container maxW="container.md" py={8}>
+      <Heading mb={6}>Create New Watchlist</Heading>
+      <Box
+        as="form"
+        onSubmit={handleSubmit}
+        bg="gray.800"
+        p={6}
+        borderRadius="md"
       >
-        Create a New Watchlist
-      </Heading>
+        <FormControl isRequired mb={4}>
+          <FormLabel>Name</FormLabel>
+          <Input
+            placeholder="My Favorite Movies"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </FormControl>
 
-      {/* Watchlist Name */}
-      <FormControl isRequired marginBottom="4">
-        <FormLabel fontWeight="bold" color="white" htmlFor="watchlistName">
-          Watchlist Name
-        </FormLabel>
-        <Input
-          placeholder="Example: My Favorites, Top Movies..."
-          size="lg"
-          id="watchlistName"
-          type="text"
-          value={watchlistName}
-          mb={4}
-          onChange={(e) => setWatchlistName(e.target.value)}
-        />
-      </FormControl>
+        <FormControl mb={6}>
+          <FormLabel>Description (Optional)</FormLabel>
+          <Textarea
+            placeholder="A collection of movies I want to watch later"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={4}
+          />
+        </FormControl>
 
-      {/* Watchlist Description */}
-      <FormControl marginBottom="6">
-        <FormLabel fontWeight="bold" color="white" htmlFor="description">
-          Watchlist Description{" "}
-          <span style={{ fontWeight: "normal", fontSize: "sm" }}>
-            (Optional)
-          </span>
-        </FormLabel>
-        <Textarea
-          placeholder="Describe the watchlist content..."
-          value={description}
-          id="description"
-          type="text"
-          size="lg"
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </FormControl>
-
-      {/* Submit Button */}
-      <Box textAlign="center">
         <Button
           colorScheme="red"
-          variant="solid"
-          size="lg"
-          width="100%"
-          onClick={handleCreateWatchlist}
-          isLoading={loading}
+          type="submit"
+          isLoading={isSubmitting}
+          width="full"
         >
-          + Create Watchlist
+          Create Watchlist
         </Button>
       </Box>
-    </Box>
+    </Container>
   );
 };
 

@@ -1,35 +1,40 @@
 const mongoose = require("mongoose");
 
-const WatchlistSchema = new mongoose.Schema({
-  user: {
+const watchlistSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  name: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: false,
-  },
   items: [
     {
-      type: {
-        // Change from String to Object
-        type: String, // Keep type here to denote it's a movie or show
-        required: true,
-      },
-      name: {
-        // Change from String to Object
+      movieId: {
         type: String,
         required: true,
       },
-      poster: {
-        // Keep poster
+      title: {
         type: String,
-        required: true, // Add required if necessary
+        required: true,
+      },
+      posterPath: {
+        type: String,
+      },
+      mediaType: {
+        type: String,
+        enum: ["movie", "tv"],
+        required: true,
+      },
+      releaseDate: {
+        type: String,
       },
       addedAt: {
         type: Date,
@@ -47,4 +52,4 @@ const WatchlistSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Watchlist", WatchlistSchema);
+module.exports = mongoose.model("Watchlist", watchlistSchema);
