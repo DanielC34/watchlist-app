@@ -12,6 +12,7 @@ import {
   Flex,
 } from "@chakra-ui/react";
 import { useWatchlistStore } from "../../store/useWatchlistStore";
+import AddToWatchlistButton from "../../components/AddToWatchlistButton";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie";
