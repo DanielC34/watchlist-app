@@ -12,7 +12,13 @@ import {
   IconButton,
   Container,
 } from "@chakra-ui/react";
-import { FaArrowLeft, FaTrash, FaEdit } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaTrash,
+  FaEdit,
+  FaBookmark,
+  FaRegBookmark,
+} from "react-icons/fa";
 import {
   getWatchlistAPI,
   createWatchlistAPI,
@@ -156,6 +162,14 @@ const WatchlistDetail = () => {
               bg="gray.700"
               position="relative"
             >
+              {/* Bookmark icon in top left */}
+              <Box position="absolute" top={2} left={2} zIndex={1}>
+                {item.watched ? (
+                  <FaBookmark color="#E53E3E" size={20} />
+                ) : (
+                  <FaRegBookmark color="#A0AEC0" size={20} />
+                )}
+              </Box>
               <Box position="absolute" top={2} right={2} zIndex={1}>
                 <IconButton
                   icon={<FaTrash />}
