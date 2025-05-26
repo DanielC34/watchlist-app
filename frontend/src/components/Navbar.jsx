@@ -14,12 +14,20 @@ import {
 import { Button } from "@chakra-ui/react";
 import useAuthStore from "../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
+import { useWatchlistStore } from "../store/useWatchlistStore";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { watchlist, getWatchlist } = useWatchlistStore();
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      getWatchlist();
+    }
+  }, [isAuthenticated, getWatchlist]);
 
   // Close sidebar when route changes (especially on mobile)
   useEffect(() => {
@@ -186,9 +194,35 @@ const Navbar = () => {
             MY LISTS
           </Text>
           {isAuthenticated ? (
-            <Text fontSize="sm" color="gray.400" fontStyle="italic">
-              Your watchlists will appear here
-            </Text>
+            <>
+              {watchlist && watchlist.length > 0 ? (
+                <Box>
+                  {watchlist.map((list) => (
+                    <Link key={list._id} to={`/watchlist/${list._id}`}>
+                      <Flex
+                        py={2}
+                        px={3}
+                        borderRadius="md"
+                        _hover={{
+                          bg: "rgba(229, 62, 62, 0.1)",
+                          color: "red.300",
+                        }}
+                        transition="all 0.2s"
+                        align="center"
+                      >
+                        <Text fontSize="sm" noOfLines={1}>
+                          {list.name}
+                        </Text>
+                      </Flex>
+                    </Link>
+                  ))}
+                </Box>
+              ) : (
+                <Text fontSize="sm" color="gray.400" fontStyle="italic">
+                  No watchlists yet
+                </Text>
+              )}
+            </>
           ) : (
             <Box>
               <Text fontSize="sm" color="gray.400" fontStyle="italic" mb={2}>

@@ -55,6 +55,17 @@ export const getWatchlistAPI = async () => {
     }
 }
 
+//Function to fetch a specific watchlist by ID
+export const getWatchlistByIdAPI = async (watchlistId) => {
+    try {
+        const response = await api.get(`/watchlist/${watchlistId}`);
+        return response.data;
+    } catch (error) {
+        console.log("Error fetching watchlist by ID:", error.message);
+        throw error; // Add this to propagate the error
+    }
+}
+
 //Function to update watchlist by sending a PUT request
 export const updateWatchlistAPI = async (watchlistId, newWatchlistName) => {
     try {

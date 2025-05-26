@@ -1,4 +1,5 @@
 import React from "react";
+
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import ReactDOM from "react-dom/client";
 import Movies from './pages/movies/Movies.jsx';
@@ -14,6 +15,7 @@ import {
   RouterProvider,
   Route,
   Link,
+  Navigate,
 } from "react-router-dom";
 import pageTheme from '../pageTheme.js';
 import Profile from "./pages/profile/Profile.jsx";
@@ -22,6 +24,7 @@ import History from './pages/history/History.jsx';
 import Login from './pages/login/Login.jsx';
 import Signup from './pages/signup/Signup.jsx'
 import Watchlist from "./pages/watchlist/CreateWatchlist.jsx";
+import WatchlistDetail from "./pages/watchlist/WatchlistDetail.jsx";
 
 const router = createBrowserRouter([
   {
@@ -29,7 +32,7 @@ const router = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: "/",
+        path: "/home",
         element: <Home />,
       },
       {
@@ -43,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "/search",
         element: <Search />,
+      },
+      {
+        path: "/watchlist/:id",
+        element: <WatchlistDetail />,
       },
       {
         path: "/profile",
@@ -75,6 +82,10 @@ const router = createBrowserRouter([
       {
         path: "/:details/:id",
         element: <Details />,
+      },
+      {
+        index: true, // this matches the parent route's path (i.e., "/")
+        element: <Navigate to="/home" replace />,
       },
     ],
   },

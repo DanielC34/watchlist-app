@@ -1,17 +1,20 @@
 import { create } from "zustand";
 import {
-    getWatchlistAPI,
-    createWatchlistAPI,
-    addItemToWatchlist,
-    updateWatchlistAPI,
-    removeItemFromWatchlistAPI,
-    deleteWatchlistAPI,
+  getWatchlistAPI,
+  createWatchlistAPI,
+  addItemToWatchlist,
+  updateWatchlistAPI,
+  removeItemFromWatchlistAPI,
+  deleteWatchlistAPI,
+  getWatchlistByIdAPI,
 } from "../api/watchlistApi";
 
 
 export const useWatchlistStore = create((set) => ({
     //Initial state
     watchlist: [], //watchlists are initially empty
+    currentWatchlist: null,
+    isLoading: false, //no loading taking place to begin with, since nothing is being done here
     loading: false, //no loading taking place to begin with, since nothing is being done here
     error: null, //no error arising from an action (fetching, adding, deleting watchlists etc)
 
@@ -24,6 +27,16 @@ export const useWatchlistStore = create((set) => ({
          } catch (error) {
              set({ error: error.message, loading: false });
          }
+    },
+
+    fetchWatchlistById: async (watchlistId) => {
+        try {
+            set({ loading: true });
+            const watchlist = await getWatchlistByIdAPI(watchlistId); //fetch watchlist by id
+            set({ currentWatchlist: watchlist, loading: false }); //set the fetched watchlist to the currentWatchlist state
+        } catch (error) {
+            set({ error: error.message, loading: false }); //catch any other errors
+        }
     },
 
     createWatchlist: async (watchlistName, description) => {
