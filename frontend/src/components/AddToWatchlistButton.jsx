@@ -1,93 +1,119 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Button,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
-  useToast,
-  Spinner,
+  IconButton,
+  HStack,
+  useToast
 } from "@chakra-ui/react";
-import { FaPlus, FaChevronDown } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import useAuthStore from "../store/useAuthStore";
+import AddItemToWatchlistModal from "../pages/watchlist/AddItemToWatchlistModal";
 import { useWatchlistStore } from "../store/useWatchlistStore";
+import PropTypes from "prop-types";
 
 const AddToWatchlistButton = ({ item }) => {
-  const toast = useToast();
-  const { watchlists, fetchWatchlists, addItemToWatchlist, isLoading } =
+  const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated } = useAuthStore();
+  const { watchlist, removeItemFromWatchlist, getWatchlist, loading } =
     useWatchlistStore();
+  const toast = useToast();
 
-  useEffect(() => {
-    // Fetch watchlists when component mounts
-    fetchWatchlists();
-  }, [fetchWatchlists]);
+  // Find all watchlists that contain this item
+  const watchlistsWithItem = useMemo(() => {
+    if (!watchlist) return [];
+    return watchlist.filter(
+      (wl) => wl.items && wl.items.some((i) => i.movieId === String(item.id))
+    );
+  }, [watchlist, item]);
 
-  const handleAddToWatchlist = async (watchlistId) => {
-    // Prepare item data
-    const itemData = {
-      movieId: item.id.toString(),
-      title: item.title || item.name,
-      posterPath: item.poster_path,
-      mediaType: item.media_type || (item.first_air_date ? "tv" : "movie"),
-      releaseDate: item.release_date || item.first_air_date,
-    };
+  // If item is in all watchlists, disable the button
+  const inAllWatchlists =
+    watchlist &&
+    watchlist.length > 0 &&
+    watchlistsWithItem.length === watchlist.length;
 
-    const result = await addItemToWatchlist(watchlistId, itemData);
-
-    if (result) {
-      toast({
-        title: "Added to watchlist",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      });
-    } else {
-      toast({
-        title: "Error adding to watchlist",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
+  const handleRemove = async (wl) => {
+    // Find the item in the watchlist
+    const itemInList = wl.items.find((i) => i.movieId === String(item.id));
+    if (!itemInList) return;
+    await removeItemFromWatchlist(wl._id, itemInList._id);
+    toast({
+      title: `Removed from "${wl.name}"`,
+      status: "info",
+      duration: 3000,
+      isClosable: true,
+    });
+    getWatchlist();
   };
 
-  if (isLoading) {
-    return (
-      <Button isLoading colorScheme="red" leftIcon={<FaPlus />}>
-        Add to Watchlist
-      </Button>
-    );
-  }
+  // Find if the item is already in any watchlist
+  const found = useMemo(() => {
+    if (!watchlist) return null;
+    for (const wl of watchlist) {
+      if (wl.items && wl.items.some((i) => i.movieId === String(item.id))) {
+        return wl;
+      }
+    }
+    return null;
+  }, [watchlist, item]);
+
+  // const handleRemove = async () => {
+  //   if (!found) return;
+  //   // Find the item in the found watchlist
+  //   const itemInList = found.items.find((i) => i.movieId === String(item.id));
+  //   if (!itemInList) return;
+  //   await removeItemFromWatchlist(found._id, itemInList._id);
+  //   toast({
+  //     title: "Removed from watchlist",
+  //     status: "info",
+  //     duration: 3000,
+  //     isClosable: true,
+  //   });
+  //   getWatchlist(); // Refresh the watchlists
+  // };
+
+  if (!isAuthenticated) return null;
 
   return (
-    <Menu>
-      <MenuButton
-        as={Button}
-        rightIcon={<FaChevronDown />}
+    <>
+      <Button
         leftIcon={<FaPlus />}
         colorScheme="red"
+        onClick={() => setIsOpen(true)}
+        isDisabled={inAllWatchlists}
       >
-        Add to Watchlist
-      </MenuButton>
-      <MenuList>
-        {watchlists.length > 0 ? (
-          watchlists.map((watchlist) => (
-            <MenuItem
-              key={watchlist._id}
-              onClick={() => handleAddToWatchlist(watchlist._id)}
+        {inAllWatchlists ? "Added to all watchlists" : "Add to Watchlist"}
+      </Button>
+      {/* Show which watchlists this item is in, with remove option */}
+      {watchlistsWithItem.length > 0 && (
+        <HStack mt={2} spacing={2}>
+          {watchlistsWithItem.map((wl) => (
+            <Button
+              key={wl._id}
+              size="sm"
+              variant="outline"
+              leftIcon={<FaTrash />}
+              colorScheme="gray"
+              onClick={() => handleRemove(wl)}
+              isLoading={loading}
             >
-              {watchlist.name}
-            </MenuItem>
-          ))
-        ) : (
-          <MenuItem
-            onClick={() => (window.location.href = "/create-watchlist")}
-          >
-            Create a watchlist first
-          </MenuItem>
-        )}
-      </MenuList>
-    </Menu>
+              {wl.name}
+            </Button>
+          ))}
+        </HStack>
+      )}
+      <AddItemToWatchlistModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        item={item}
+      />
+    </>
   );
+};
+
+
+AddToWatchlistButton.propTypes = {
+  item: PropTypes.object.isRequired,
 };
 
 export default AddToWatchlistButton;

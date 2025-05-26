@@ -11,7 +11,6 @@ import {
   Box,
   Flex,
 } from "@chakra-ui/react";
-import { useWatchlistStore } from "../../store/useWatchlistStore";
 import AddToWatchlistButton from "../../components/AddToWatchlistButton";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
@@ -26,47 +25,13 @@ const Details = () => {
   const [details, setDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const watchlist = useWatchlistStore(state => state.watchlist); // Use useWatchlistStore hook to access watchlist state and actions
-  const addItemToWatchlist = useWatchlistStore(state => state.addItemToWatchlist); // Use useWatchlistStore hook for addItemToWatchlist
-  const removeItemFromWatchlist = useWatchlistStore(state => state.removeItemFromWatchlist); // Use useWatchlistStore hook for removeItemFromWatchlist
-  const deleteWatchlist = useWatchlistStore(state => state.deleteWatchlist); // Use useWatchlistStore hook for deleteWatchlist
-  const createWatchlist = useWatchlistStore(state => state.createWatchlist); // Use useWatchlistStore hook for createWatchlist
-  const getWatchlist = useWatchlistStore(state => state.getWatchlist); // Use useWatchlistStore hook for getWatchlist
-  const updateWatchlist = useWatchlistStore(state => state.updateWatchlist); // Use useWatchlistStore hook for updateWatchlist
-
-
-  const [isInWatchlist, setIsInWatchlist] = useState(
-   watchlist.some((item) => item.id === id)
- );
-
-  useEffect(() => {
-    // Recalculate if item is in the watchlist whenever the watchlist changes
-    setIsInWatchlist(watchlist.some((item) => item.id === id));
-  }, [watchlist, id]);
-
-  useEffect(() => {
-    getWatchlist(); // Fetch watchlist on mount
-  }, [getWatchlist]);
-
-  const handleWatchlistToggle = () => {
-
-    if (!details || !details.id) {
-      console.error("Details object must have an 'id' property.");
-      return;
-    }
-
-    if (isInWatchlist) {
-      // The item is currently in the watchlist
-      removeItemFromWatchlist(id); // Remove the item from the watchlist
-      setIsInWatchlist(false); // Update `isInWatchlist` to false
-      console.log("Removing item from watchlist"); // Log or notify that the item has been removed from the watchlist
-    } else {
-      // The item is not currently in the watchlist
-      addItemToWatchlist(details); // Add the item to the watchlist
-      setIsInWatchlist(true);// Update `isInWatchlist` to true
-      console.log("Added item to watchlist"); // Log or notify that the item has been added to the watchlist
-    }
-  }
+  // const watchlist = useWatchlistStore(state => state.watchlist); // Use useWatchlistStore hook to access watchlist state and actions
+  // const addItemToWatchlist = useWatchlistStore(state => state.addItemToWatchlist); // Use useWatchlistStore hook for addItemToWatchlist
+  // const removeItemFromWatchlist = useWatchlistStore(state => state.removeItemFromWatchlist); // Use useWatchlistStore hook for removeItemFromWatchlist
+  // const deleteWatchlist = useWatchlistStore(state => state.deleteWatchlist); // Use useWatchlistStore hook for deleteWatchlist
+  // const createWatchlist = useWatchlistStore(state => state.createWatchlist); // Use useWatchlistStore hook for createWatchlist
+  // const getWatchlist = useWatchlistStore(state => state.getWatchlist); // Use useWatchlistStore hook for getWatchlist
+  // const updateWatchlist = useWatchlistStore(state => state.updateWatchlist); // Use useWatchlistStore hook for updateWatchlist
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -147,16 +112,7 @@ const Details = () => {
             {details.genres.map((genre) => genre.name).join(", ")}
           </Text>
           <div>
-            <Button
-              colorScheme="red"
-              mt="4"
-              mb="4"
-              onClick={handleWatchlistToggle}
-              size={{ base: "sm", md: "md" }}
-              width={{ base: "100%", md: "auto" }}
-            >
-              {isInWatchlist ? "- Remove from Watchlist" : "+ Add to Watchlist"}
-            </Button>
+            <AddToWatchlistButton item={details} />
           </div>
         </Box>
       </Flex>
