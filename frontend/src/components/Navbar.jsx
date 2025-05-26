@@ -15,13 +15,15 @@ import { Button } from "@chakra-ui/react";
 import useAuthStore from "../store/useAuthStore";
 import { useNavigate } from "react-router-dom";
 import { useWatchlistStore } from "../store/useWatchlistStore";
+import LogoutModal from "./LogoutModal";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const { watchlist, getWatchlist } = useWatchlistStore();
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -47,6 +49,13 @@ const Navbar = () => {
   // Function to handle login button click
   const handleLoginClick = () => {
     navigate("/profile");
+  };
+
+  const handleLogout = () => {
+    logout();
+    setLogoutModalOpen(false);
+    // Optionally navigate to home or login page
+    navigate("/");
   };
 
   // Check if the current path matches the link path
@@ -272,8 +281,13 @@ const Navbar = () => {
           )}
 
           {isAuthenticated ? (
-            <Button colorScheme="red" variant="outline" width="100%">
-              <Link to="/logout">Logout</Link>
+            <Button
+              colorScheme="red"
+              variant="outline"
+              width="100%"
+              onClick={() => setLogoutModalOpen(true)}
+            >
+              Logout
             </Button>
           ) : (
             <Button
@@ -285,6 +299,12 @@ const Navbar = () => {
               Login / Sign Up
             </Button>
           )}
+
+          <LogoutModal
+            isOpen={logoutModalOpen}
+            onClose={() => setLogoutModalOpen(false)}
+            onConfirm={handleLogout}
+          />
         </Box>
       </Box>
 
