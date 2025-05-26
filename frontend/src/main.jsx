@@ -5,7 +5,6 @@ import ReactDOM from "react-dom/client";
 import Movies from './pages/movies/Movies.jsx';
 import Shows from './pages/shows/Shows.jsx';
 import Home from './pages/Home.jsx'
-import Logout from './pages/logout/Logout.jsx'
 import Search from "./pages/search/Search.jsx";
 import Details from "./pages/details/Details.jsx";
 import App from './App';
@@ -75,10 +74,10 @@ const router = createBrowserRouter([
         path: "/signup",
         element: <Signup />,
       },
-      {
-        path: "/logout",
-        element: <Logout />,
-      },
+      // {
+      //   path: "/logout",
+      //   element: <Logout />,
+      // },
       {
         path: "/:details/:id",
         element: <Details />,
