@@ -23,10 +23,19 @@ import {
   Flex,
   Box,
   Avatar,
+  SimpleGrid,
+  Spinner,
 } from "@chakra-ui/react";
-import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
+import {
+  FaEnvelope,
+  FaLock,
+  FaUser,
+  FaBookmark,
+  FaRegBookmark,
+} from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 import useAuthStore from "../../store/useAuthStore";
+import { useWatchlistStore } from "../../store/useWatchlistStore";
 
 const Profile = () => {
   // State for login form
@@ -42,7 +51,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Initialize state from the Auth Store
+  // Auth store
   const { user, login, signup, isAuthenticated, error, clearError } =
     useAuthStore((state) => ({
       user: state.user,
@@ -52,6 +61,13 @@ const Profile = () => {
       error: state.error,
       clearError: state.clearError,
     }));
+
+  // Watchlist store
+  const { watchlist, getWatchlist, loading } = useWatchlistStore();
+
+  useEffect(() => {
+    getWatchlist();
+  }, [getWatchlist]);
 
   // Handle login form submission
   const handleLogin = async (e) => {
@@ -234,25 +250,85 @@ const Profile = () => {
         </ModalContent>
       </Modal>
 
-      {/* Display user profile when authenticated */}
+      {/* Display user profile and watchlists when authenticated */}
       {isAuthenticated && (
-        <Box
-          p={4}
-          bg="gray.700"
-          color="white"
-          maxWidth="400px"
-          mx="auto"
-          mt={6}
-          borderRadius="md"
-          boxShadow="md"
-        >
-          <VStack spacing={4}>
-            <Avatar size="xl" src={user?.profilePicture} />
-            <Text fontSize="lg" fontWeight="bold">
-              {user?.username || "Username not available"}
+        <Box maxW="container.md" mx="auto" py={8}>
+          <Box
+            p={4}
+            bg="gray.700"
+            color="white"
+            maxWidth="400px"
+            mx="auto"
+            mt={6}
+            borderRadius="md"
+            boxShadow="md"
+          >
+            <VStack spacing={4}>
+              <Avatar size="xl" src={user?.profilePicture} />
+              <Text fontSize="lg" fontWeight="bold">
+                {user?.username || "Username not available"}
+              </Text>
+              <Text fontSize="md">{user?.email || "Email not available"}</Text>
+            </VStack>
+          </Box>
+
+          {/* My Watchlists Section */}
+          <Box mt={10}>
+            <Text fontSize="2xl" fontWeight="bold" mb={4}>
+              My Watchlists
             </Text>
-            <Text fontSize="md">{user?.email || "Email not available"}</Text>
-          </VStack>
+            {loading ? (
+              <Flex justify="center" align="center" minH="100px">
+                <Spinner />
+              </Flex>
+            ) : watchlist && watchlist.length > 0 ? (
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                {watchlist.map((wl) => {
+                  // All items watched?
+                  const allWatched =
+                    wl.items &&
+                    wl.items.length > 0 &&
+                    wl.items.every((item) => item.watched);
+                  return (
+                    <Link key={wl._id} to={`/watchlist/${wl._id}`}>
+                      <Box
+                        p={4}
+                        borderWidth="1px"
+                        borderRadius="md"
+                        bg="gray.700"
+                        _hover={{ bg: "gray.600", boxShadow: "md" }}
+                        transition="all 0.2s"
+                        cursor="pointer"
+                        position="relative"
+                      >
+                        {/* Bookmark icon in top left */}
+                        <Box position="absolute" top={2} left={2} zIndex={1}>
+                          {allWatched ? (
+                            <FaBookmark color="#E53E3E" size={20} />
+                          ) : (
+                            <FaRegBookmark color="#A0AEC0" size={20} />
+                          )}
+                        </Box>
+                        <Text fontWeight="bold" pl={7}>
+                          {wl.name}
+                        </Text>
+                        {wl.description && (
+                          <Text fontSize="sm" color="gray.400" mt={1} pl={7}>
+                            {wl.description}
+                          </Text>
+                        )}
+                        <Text fontSize="xs" color="gray.500" mt={2} pl={7}>
+                          {wl.items?.length || 0} items
+                        </Text>
+                      </Box>
+                    </Link>
+                  );
+                })}
+              </SimpleGrid>
+            ) : (
+              <Text color="gray.400">You have no watchlists yet.</Text>
+            )}
+          </Box>
         </Box>
       )}
     </>
