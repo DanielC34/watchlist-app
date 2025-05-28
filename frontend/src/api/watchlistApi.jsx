@@ -28,8 +28,12 @@ export const createWatchlistAPI = async (watchlistName, description) => {
                 });
         return response.data //Contains new watchlist data
      } catch (error) {
-        console.log("Error creating watchlist:", error.message);
-        throw error;
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+        console.log("Error creating watchlist:", message);
+        throw new Error(message);
      }
 };
 
@@ -39,8 +43,12 @@ export const addItemToWatchlist = async (watchlistId, item) => {
         const response = await api.post(`/watchlist/${watchlistId}/add-item`, item)
         return response.data;
     } catch (error) {
-        console.log("Error adding item to watchlist:", error.message);
-        throw error;
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+          console.log("Error adding item to watchlist:", message);
+        throw new Error(message);
      }
 }
 
@@ -50,8 +58,12 @@ export const getWatchlistAPI = async () => {
       const response = await api.get(`/watchlist`); // Fixed endpoint
       return response.data;
     } catch (error) {
-    console.log("Error fetching watchlist:", error.response?.data || error.message);
-    throw error;
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+        console.log("Error fetching watchlist:", message);
+        throw new Error(message);
     }
 }
 
@@ -61,8 +73,12 @@ export const getWatchlistByIdAPI = async (watchlistId) => {
         const response = await api.get(`/watchlist/${watchlistId}`);
         return response.data;
     } catch (error) {
-        console.log("Error fetching watchlist by ID:", error.message);
-        throw error; // Add this to propagate the error
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+          console.log("Error fetching watchlist by ID:", message);
+        throw new Error(message);
     }
 }
 
@@ -77,19 +93,27 @@ export const updateWatchlistAPI = async (watchlistId, newWatchlistName) => {
         )
         return response.data;
     } catch (error) {
-        console.log("Error updating watchlist:", error.message);
-        throw error; // Add this to propagate the error
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+          console.log("Error updating watchlist:", message);
+        throw new Error(message);
      }
 }
  
 //Function to delete watchlist by sending a DELETE request
 export const deleteWatchlistAPI = async (watchlistId) => {
     try {
-        const response = await axios.delete(`/api/watchlist/${watchlistId}`);
+        const response = await axios.delete(`/watchlist/${watchlistId}`);
         return response.data;
     } catch (error) {
-        console.log("Error deleting watchlist:", error.message);
-        throw error;
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create watchlist.";
+        console.log("Error deleting watchlist:", message);
+        throw new Error(message);
     }
 }
 
@@ -101,8 +125,14 @@ export const removeItemFromWatchlistAPI = async (watchlistId, itemId) => {
         );
         return response.data;
     } catch (error) {
-        console.log("Error deleting item from watchlist:", error.message);
-        throw error;
+        // Extract a user-friendly message
+        const message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to remove item from watchlist.";
+        console.log("Error deleting item from watchlist:", message);
+        // Throw a new error with the user-friendly message
+        throw new Error(message);
     }
 }
 

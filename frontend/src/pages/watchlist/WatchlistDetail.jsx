@@ -32,6 +32,7 @@ const WatchlistDetail = () => {
   const toast = useToast();
 
   const { isAuthenticated } = useAuthStore();
+  const { clearError } = useWatchlistStore();
 
   const {
     fetchWatchlistById,
@@ -46,25 +47,28 @@ const WatchlistDetail = () => {
     if (isAuthenticated) {
       fetchWatchlistById(id);
     }
-  }, [id, isAuthenticated, fetchWatchlistById]);
+    return () => {
+      clearError(); // Clear errors on unmount/navigation
+    };
+  }, [id, isAuthenticated, fetchWatchlistById, clearError]);
 
   const handleRemoveItem = async (itemId) => {
-    const success = await removeItemFromWatchlist(id, itemId); //2.2 Call store function to remove item from watchlist
-
-    if (success) {
+    try {
+      await removeItemFromWatchlist(id, itemId);
       toast({
-        title: "Item removed",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      }); //2.3 success toast shown
-    } else {
+      title: "Item removed",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
+      });
+    } catch (error) {
       toast({
-        title: "Error removing item",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      }); // show error toast if removal fails
+      title: "Error removing item",
+      description: error.message || "Something went wrong.",
+      status: "error",
+      duration: 3000,
+      isClosable: true,
+      });
     }
   };
 

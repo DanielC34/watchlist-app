@@ -14,6 +14,7 @@ export const useWatchlistStore = create((set) => ({
   //Initial state
   watchlist: [], //watchlists are initially empty
   currentWatchlist: null,
+  clearError: () => set({ error: null }),
   isLoading: false, //no loading taking place to begin with, since nothing is being done here
   loading: false, //no loading taking place to begin with, since nothing is being done here
   error: null, //no error arising from an action (fetching, adding, deleting watchlists etc)
