@@ -49,7 +49,7 @@ const WatchlistDetail = () => {
   }, [id, isAuthenticated, fetchWatchlistById]);
 
   const handleRemoveItem = async (itemId) => {
-    const success = await removeItemFromWatchlist(id, itemId);
+    const success = await removeItemFromWatchlist(id, itemId); //2.2 Call store function to remove item from watchlist
 
     if (success) {
       toast({
@@ -57,14 +57,14 @@ const WatchlistDetail = () => {
         status: "success",
         duration: 3000,
         isClosable: true,
-      });
+      }); //2.3 success toast shown
     } else {
       toast({
         title: "Error removing item",
         status: "error",
         duration: 3000,
         isClosable: true,
-      });
+      }); // show error toast if removal fails
     }
   };
 
@@ -186,6 +186,16 @@ const WatchlistDetail = () => {
                 bg="gray.700"
                 position="relative"
               >
+                {/*2.5 Bin Icon for removing item */}
+                <Box position="absolute" top={2} right={2} zIndex={1}>
+                  <IconButton
+                    icon={<FaTrash />}
+                    aria-label="Remove from watchlist"
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() => handleRemoveItem(item._id)}
+                  />
+                </Box>
                 {/* Bookmark icon in top left */}
                 <Box position="absolute" top={2} left={2} zIndex={1}>
                   {item.watched ? (
