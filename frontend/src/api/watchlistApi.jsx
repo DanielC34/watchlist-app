@@ -85,7 +85,7 @@ export const updateWatchlistAPI = async (watchlistId, newWatchlistName) => {
 //Function to delete watchlist by sending a DELETE request
 export const deleteWatchlistAPI = async (watchlistId) => {
     try {
-        const response = await axios.delete(`${BASE_URL}/watchlist/${watchlistId}`);
+        const response = await axios.delete(`/api/watchlist/${watchlistId}`);
         return response.data;
     } catch (error) {
         console.log("Error deleting watchlist:", error.message);
@@ -96,7 +96,9 @@ export const deleteWatchlistAPI = async (watchlistId) => {
 //Function to remove item from watchlist by sending a DELETE request
 export const removeItemFromWatchlistAPI = async (watchlistId, itemId) => {
     try {
-        const response = await axios.delete(`${BASE_URL}/watchlist/${watchlistId}/remove-item/${itemId}`);
+        const response = await api.delete(
+          `/watchlist/${watchlistId}/items/${itemId}`
+        );
         return response.data;
     } catch (error) {
         console.log("Error deleting item from watchlist:", error.message);
