@@ -237,14 +237,6 @@ const Navbar = () => {
               <Text fontSize="sm" color="gray.400" fontStyle="italic" mb={2}>
                 Login to see your watchlists
               </Text>
-              <Button
-                colorScheme="red"
-                size="sm"
-                width="100%"
-                onClick={handleLoginClick}
-              >
-                Login / Sign Up
-              </Button>
             </Box>
           )}
         </Box>

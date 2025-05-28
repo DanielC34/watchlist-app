@@ -47,7 +47,7 @@ const Profile = () => {
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen, onClose: chakraOnClose } = useDisclosure();
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -69,6 +69,12 @@ const Profile = () => {
     getWatchlist();
   }, [getWatchlist]);
 
+  // Custom onClose that also navigates
+  const handleModalClose = () => {
+    chakraOnClose();
+    navigate("/movies");
+  };
+
   // Handle login form submission
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -84,8 +90,8 @@ const Profile = () => {
           duration: 5000,
           isClosable: true,
         });
-        onClose(); // Close the modal
-        navigate("/"); // Redirect to home page
+        handleModalClose(); // Close the modal
+        // navigate("/"); // Redirect to home page
       }
     } catch (err) {
       toast({
@@ -114,8 +120,8 @@ const Profile = () => {
         isClosable: true,
       });
 
-      onClose(); // Close the modal
-      navigate("/"); // Redirect to home page
+      handleModalClose(); // Close the modal
+      // navigate("/"); // Redirect to home page
     } catch (err) {
       toast({
         title: "Error.",
@@ -136,7 +142,7 @@ const Profile = () => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="md">
+      <Modal isOpen={isOpen} onClose={handleModalClose} size="md">
         <ModalOverlay />
         <ModalContent bg="gray.800" color="white">
           <ModalHeader fontSize="xl">Welcome to FilmVault</ModalHeader>
@@ -243,7 +249,7 @@ const Profile = () => {
             </Tabs>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="gray" mr={3} onClick={onClose}>
+            <Button colorScheme="gray" mr={3} onClick={handleModalClose}>
               Close
             </Button>
           </ModalFooter>
