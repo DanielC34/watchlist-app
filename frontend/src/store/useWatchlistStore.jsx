@@ -31,11 +31,11 @@ export const useWatchlistStore = create((set) => ({
 
     fetchWatchlistById: async (watchlistId) => {
         try {
-            set({ loading: true });
+            set({ isLoading: true, error: null });
             const watchlist = await getWatchlistByIdAPI(watchlistId); //fetch watchlist by id
-            set({ currentWatchlist: watchlist, loading: false }); //set the fetched watchlist to the currentWatchlist state
+            set({ currentWatchlist: watchlist, isLoading: false }); //set the fetched watchlist to the currentWatchlist state
         } catch (error) {
-            set({ error: error.message, loading: false }); //catch any other errors
+            set({ error: error.message, isLoading: false, currentWatchlist: null }); //catch any other errors
         }
     },
 

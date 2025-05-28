@@ -66,8 +66,24 @@ const Profile = () => {
   const { watchlist, getWatchlist, loading } = useWatchlistStore();
 
   useEffect(() => {
+    if (isAuthenticated && isOpen) {
+      handleModalClose();
+      toast({
+        title: "Login successful.",
+        description: `Welcome back, ${user.username}`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    // eslint-disable-next-line
+  }, [isAuthenticated]);
+
+  useEffect(() => {
     getWatchlist();
   }, [getWatchlist]);
+
+
 
   // Custom onClose that also navigates
   const handleModalClose = () => {
@@ -82,17 +98,17 @@ const Profile = () => {
       await login(email, password);
 
       // Check if login was successful
-      if (isAuthenticated) {
-        toast({
-          title: "Login successful.",
-          description: `Welcome back, ${user.username}`,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-        handleModalClose(); // Close the modal
-        // navigate("/"); // Redirect to home page
-      }
+      // if (isAuthenticated) {
+        // toast({
+        //   title: "Login successful.",
+        //   description: `Welcome back, ${user.username}`,
+        //   status: "success",
+        //   duration: 5000,
+        //   isClosable: true,
+        // });
+      //   handleModalClose(); // Close the modal
+      //   // navigate("/"); // Redirect to home page
+      // }
     } catch (err) {
       toast({
         title: "Error.",
