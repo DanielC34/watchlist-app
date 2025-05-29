@@ -1,6 +1,7 @@
-import { Container, Flex, FormLabel, FormControl, Select, Button } from '@chakra-ui/react'
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import { Container, Flex, FormLabel, FormControl, Select, Button, Heading } from '@chakra-ui/react'
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom';
+import { useToast } from '@chakra-ui/react';
 import axios from 'axios';
 import Loading from "../components/Loading.jsx";
 
@@ -15,6 +16,16 @@ const Home = () => {
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
   const [loading, setLoading] = useState(true);
+
+  const location = useLocation(); // Get the current location to check for state
+  const toast = useToast();
+
+  // Check if there is a state passed from the previous page
+  useEffect(() => {
+    if (location.state?.toast) {
+      toast(location.state.toast);
+    }
+  }, [location, toast]);
 
   useEffect(() => {
     fetchTrending(timeframe, currentPage);
