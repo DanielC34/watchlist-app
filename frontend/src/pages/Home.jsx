@@ -1,9 +1,17 @@
-import { Container, Flex, FormLabel, FormControl, Select, Button, Heading } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
-import axios from 'axios';
+import {
+  Container,
+  Flex,
+  FormLabel,
+  FormControl,
+  Select,
+  Button,
+  Heading,
+} from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
+import axios from "axios";
 import Loading from "../components/Loading.jsx";
-
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 console.log("API Key loaded:", API_KEY ? "Yes" : "No");
@@ -17,6 +25,16 @@ const Home = () => {
   const [totalPages, setTotalPages] = useState(0); // Total number of pages
   const [loading, setLoading] = useState(true);
 
+  const location = useLocation(); // Get the current location to check for state
+  const toast = useToast();
+
+  // Check if there is a state passed from the previous page
+  useEffect(() => {
+    if (location.state?.toast) {
+      toast(location.state.toast);
+    }
+  }, [location, toast]);
+
   useEffect(() => {
     fetchTrending(timeframe, currentPage);
   }, [timeframe, currentPage]);
@@ -26,25 +44,25 @@ const Home = () => {
     try {
       setLoading(true); //Sets loading to true while TV show data is being fetched
 
-          console.log(
-            `Fetching trending data: ${BASE_URL}/trending/all/${timeframe}?api_key=XXX&page=${page}`
-          );
+      console.log(
+        `Fetching trending data: ${BASE_URL}/trending/all/${timeframe}?api_key=XXX&page=${page}`
+      );
 
       const response = await axios.get(
         `${BASE_URL}/trending/all/${timeframe}?api_key=${API_KEY}&page=${page}`
       );
-          if (response.data && response.data.results) {
-            setTrending(response.data.results);
-            // Calculate total pages based on the total number of items and items per page
-            const totalItems = response.data.total_results;
-            const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
-            setTotalPages(totalPagesCount);
-          } else {
-            console.error("Invalid API response format:", response.data);
-            setTrending([]);
-          }
+      if (response.data && response.data.results) {
+        setTrending(response.data.results);
+        // Calculate total pages based on the total number of items and items per page
+        const totalItems = response.data.total_results;
+        const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
+        setTotalPages(totalPagesCount);
+      } else {
+        console.error("Invalid API response format:", response.data);
+        setTrending([]);
+      }
 
-          setLoading(false);
+      setLoading(false);
     } catch (error) {
       console.error(
         "Error fetching trending data for trending movies & tv shows:",
@@ -52,7 +70,7 @@ const Home = () => {
       );
       setLoading(false);
       setTrending([]);
-    } 
+    }
   };
 
   // Function to handle timeframe selection change
@@ -168,6 +186,6 @@ const Home = () => {
       </Flex>
     </>
   );
-}
+};
 
-export default Home
+export default Home;

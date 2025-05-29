@@ -9,7 +9,6 @@ import {
   getWatchlistByIdAPI,
 } from "../api/watchlistApi";
 
-
 export const useWatchlistStore = create((set) => ({
   //Initial state
   watchlist: [], //watchlists are initially empty
@@ -136,12 +135,14 @@ export const useWatchlistStore = create((set) => ({
       set((state) => ({
         watchlist: state.watchlist.filter(
           (watchlist) => watchlist._id !== watchlistId
-        ), //remove the watchlist from the watchlist statedd the new item to the watchlist array
+        ), //remove the watchlist from the watchlist stated the new item to the watchlist array
+        currentWatchlist: null,
         loading: false,
       })); //remove the watchlist from the watchlist stated the new item to the watchlist array
+      return true;
     } catch (error) {
       set({ error: error.message, loading: false }); //catch any other errors
+      return false; // Indicate failure
     }
   },
 }));
-
