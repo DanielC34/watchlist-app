@@ -15,6 +15,8 @@ import {
   ModalOverlay,
   ModalContent,
   ModalBody,
+  ModalHeader,
+  ModalFooter,
 } from "@chakra-ui/react";
 import {
   FaArrowLeft,
@@ -31,8 +33,11 @@ const WatchlistDetail = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const { isAuthenticated } = useAuthStore();
+  const [redirectAfterDelete, setRedirectAfterDelete] = React.useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
+  const { isAuthenticated } = useAuthStore();
   const {
     fetchWatchlistById,
     currentWatchlist,
@@ -40,6 +45,7 @@ const WatchlistDetail = () => {
     error,
     removeItemFromWatchlist,
     deleteWatchlist,
+    getWatchlist,
   } = useWatchlistStore();
 
   useEffect(() => {
@@ -48,75 +54,93 @@ const WatchlistDetail = () => {
     }
   }, [id, isAuthenticated, fetchWatchlistById]);
 
-  const handleRemoveItem = async (itemId) => {
-    const success = await removeItemFromWatchlist(id, itemId); //2.2 Call store function to remove item from watchlist
+  const openDeleteModal = () => setIsDeleteModalOpen(true);
+  const closeDeleteModal = () => {
+    if (!isDeleting) setIsDeleteModalOpen(false);
+  };
 
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const success = await deleteWatchlist(id);
+      if (success) {
+        await getWatchlist();
+        setIsDeleting(false);
+        setIsDeleteModalOpen(false);
+        toast({
+          title: "Watchlist deleted successfully",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+        navigate("/");
+      } else {
+        setIsDeleting(false);
+      }
+    } catch (error) {
+      setIsDeleting(false);
+      toast({
+        title: "Error deleting watchlist",
+        description: error.message || "Something went wrong.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  const handleRemoveItem = async (itemId) => {
+    const success = await removeItemFromWatchlist(id, itemId);
     if (success) {
       toast({
         title: "Item removed",
         status: "success",
         duration: 3000,
         isClosable: true,
-      }); //2.3 success toast shown
+      });
     } else {
       toast({
         title: "Error removing item",
         status: "error",
         duration: 3000,
         isClosable: true,
-      }); // show error toast if removal fails
+      });
     }
   };
 
-  const handleDeleteWatchlist = async () => {
-    if (window.confirm("Are you sure you want to delete this watchlist?")) {
-      const success = await deleteWatchlist(id);
-
-      if (success) {
-        toast({
-          title: "Watchlist deleted",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-        });
-        navigate("/");
-      } else {
-        toast({
-          title: "Error deleting watchlist",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      }
-    }
-  };
-
-  // Loading modal overlay
-  // Shows while isLoading is true, closes automatically
   const LoadingModal = () => (
-    <Modal
-      isOpen={isLoading}
-      onClose={() => {}}
-      isCentered
-      closeOnOverlayClick={false}
-      blockScrollOnMount={false}
-      trapFocus={false}
-      motionPreset="none"
-    >
+    <Modal isOpen={isLoading} onClose={() => {}} isCentered closeOnOverlayClick={false} blockScrollOnMount={false} trapFocus={false} motionPreset="none">
       <ModalOverlay bg="rgba(0,0,0,0.7)" />
       <ModalContent bg="transparent" boxShadow="none">
-        <ModalBody
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          py={16}
-        >
+        <ModalBody display="flex" flexDirection="column" alignItems="center" justifyContent="center" py={16}>
           <Spinner size="2xl" color="red.500" thickness="6px" speed="0.7s" />
-          <Text mt={6} color="white" fontWeight="bold" fontSize="lg">
-            Loading your watchlist...
-          </Text>
+          <Text mt={6} color="white" fontWeight="bold" fontSize="lg">Loading your watchlist...</Text>
         </ModalBody>
+      </ModalContent>
+    </Modal>
+  );
+
+  const DeleteConfirmationModal = () => (
+    <Modal isOpen={isDeleteModalOpen} onClose={isDeleting ? () => {} : closeDeleteModal} isCentered>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>Delete Watchlist</ModalHeader>
+        <ModalBody>
+          {isDeleting ? (
+            <Flex align="center" justify="center" py={4}>
+              <Spinner size="lg" color="red.500" mr={3} />
+              <Text>Deleting watchlist...</Text>
+            </Flex>
+          ) : (
+            <Text>Are you sure you want to delete this watchlist?</Text>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button onClick={closeDeleteModal} mr={3} isDisabled={isDeleting}>No</Button>
+          <Button colorScheme="red" onClick={handleConfirmDelete} isLoading={isDeleting} loadingText="Deleting">Yes, Delete</Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   );
@@ -124,9 +148,7 @@ const WatchlistDetail = () => {
   if (error) {
     return (
       <Container maxW="container.xl" py={4}>
-        <Button leftIcon={<FaArrowLeft />} onClick={() => navigate("/home")} mb={4}>
-          Back to Home
-        </Button>
+        <Button leftIcon={<FaArrowLeft />} onClick={() => navigate("/home")} mb={4}>Back to Home</Button>
         <Text color="red.400">Error: {error}</Text>
       </Container>
     );
@@ -135,10 +157,8 @@ const WatchlistDetail = () => {
   if (!currentWatchlist) {
     return (
       <Container maxW="container.xl" py={4}>
-      <Button leftIcon={<FaArrowLeft />} onClick={() => navigate(-1)} mb={4}>
-        Back
-      </Button>
-      <Text>Watchlist not found</Text>
+        <Button leftIcon={<FaArrowLeft />} onClick={() => navigate(-1)} mb={4}>Back</Button>
+        <Text>Watchlist not found</Text>
       </Container>
     );
   }
@@ -146,85 +166,33 @@ const WatchlistDetail = () => {
   return (
     <>
       <LoadingModal />
+      <DeleteConfirmationModal />
       <Container maxW="container.xl" py={4}>
         <Flex justify="space-between" align="center" mb={6}>
-          <Button leftIcon={<FaArrowLeft />} onClick={() => navigate(-1)}>
-            Back
-          </Button>
+          <Button leftIcon={<FaArrowLeft />} onClick={() => navigate(-1)}>Back</Button>
           <Flex>
-            <IconButton
-              icon={<FaEdit />}
-              aria-label="Edit watchlist"
-              mr={2}
-              onClick={() => navigate(`/edit-watchlist/${id}`)}
-            />
-            <IconButton
-              icon={<FaTrash />}
-              aria-label="Delete watchlist"
-              colorScheme="red"
-              onClick={handleDeleteWatchlist}
-            />
+            <IconButton icon={<FaEdit />} aria-label="Edit watchlist" mr={2} onClick={() => navigate(`/edit-watchlist/${id}`)} />
+            <IconButton icon={<FaTrash />} aria-label="Delete watchlist" colorScheme="red" onClick={openDeleteModal} />
           </Flex>
         </Flex>
 
-        <Heading size="lg" mb={2}>
-          {currentWatchlist.name}
-        </Heading>
-        {currentWatchlist.description && (
-          <Text color="gray.400" mb={6}>
-            {currentWatchlist.description}
-          </Text>
-        )}
+        <Heading size="lg" mb={2}>{currentWatchlist.name}</Heading>
+        {currentWatchlist.description && <Text color="gray.400" mb={6}>{currentWatchlist.description}</Text>}
 
         {currentWatchlist.items && currentWatchlist.items.length > 0 ? (
           <Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={4}>
             {currentWatchlist.items.map((item) => (
-              <Box
-                key={item._id}
-                borderRadius="md"
-                overflow="hidden"
-                bg="gray.700"
-                position="relative"
-              >
-                {/*2.5 Bin Icon for removing item */}
+              <Box key={item._id} borderRadius="md" overflow="hidden" bg="gray.700" position="relative">
                 <Box position="absolute" top={2} right={2} zIndex={1}>
-                  <IconButton
-                    icon={<FaTrash />}
-                    aria-label="Remove from watchlist"
-                    size="sm"
-                    colorScheme="red"
-                    onClick={() => handleRemoveItem(item._id)}
-                  />
+                  <IconButton icon={<FaTrash />} aria-label="Remove from watchlist" size="sm" colorScheme="red" onClick={() => handleRemoveItem(item._id)} />
                 </Box>
-                {/* Bookmark icon in top left */}
                 <Box position="absolute" top={2} left={2} zIndex={1}>
-                  {item.watched ? (
-                    <FaBookmark color="#E53E3E" size={20} />
-                  ) : (
-                    <FaRegBookmark color="#A0AEC0" size={20} />
-                  )}
+                  {item.watched ? <FaBookmark color="#E53E3E" size={20} /> : <FaRegBookmark color="#A0AEC0" size={20} />}
                 </Box>
-                <Box position="absolute" top={2} right={2} zIndex={1}>
-                  <IconButton
-                    icon={<FaTrash />}
-                    aria-label="Remove from watchlist"
-                    size="sm"
-                    colorScheme="red"
-                    onClick={() => handleRemoveItem(item._id)}
-                  />
-                </Box>
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${item.posterPath}`}
-                  alt={item.title}
-                  style={{ width: "100%", height: "auto" }}
-                />
+                <img src={`https://image.tmdb.org/t/p/w500${item.posterPath}`} alt={item.title} style={{ width: "100%", height: "auto" }} />
                 <Box p={2}>
-                  <Text fontWeight="bold" noOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text fontSize="sm" color="gray.400">
-                    {item.mediaType === "movie" ? "Movie" : "TV Show"}
-                  </Text>
+                  <Text fontWeight="bold" noOfLines={1}>{item.title}</Text>
+                  <Text fontSize="sm" color="gray.400">{item.mediaType === "movie" ? "Movie" : "TV Show"}</Text>
                 </Box>
               </Box>
             ))}
@@ -232,9 +200,7 @@ const WatchlistDetail = () => {
         ) : (
           <Box p={8} textAlign="center" borderRadius="md" bg="gray.700">
             <Text mb={4}>This watchlist is empty</Text>
-            <Button colorScheme="red" onClick={() => navigate("/movies")}>
-              Browse Movies
-            </Button>
+            <Button colorScheme="red" onClick={() => navigate("/movies")}>Browse Movies</Button>
           </Box>
         )}
       </Container>
