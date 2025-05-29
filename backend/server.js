@@ -26,7 +26,12 @@ app.use(session({
 // Database Connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(() =>
+    console.log("MongoDB connected", {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    })
+  )
   .catch((err) => console.log(err));
 
 // // Routes

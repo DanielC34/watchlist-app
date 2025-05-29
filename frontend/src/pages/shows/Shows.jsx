@@ -62,12 +62,19 @@ const Shows = () => {
 
   return (
     <>
-      <h2 className="font-bold text-xl">Trending TV Shows</h2>
-      <Container maxW={"container.xl"}>
-        <Flex alignItems={"baseline"} gap={"4"} my={"10"}>
+      <h2 className="font-bold text-xl mb-2">Trending TV Shows</h2>
+      <Container maxW={"container.xl"} px={{ base: 2, md: 4 }}>
+        <Flex alignItems={"baseline"} gap={"4"} my={{ base: 5, md: 10 }}>
           <FormControl>
-            <FormLabel>Discover new Shows</FormLabel>
-            <Select w="200px" value={category} onChange={handleCategoryChange}>
+            <FormLabel fontSize={{ base: "sm", md: "md" }}>
+              Discover new Shows
+            </FormLabel>
+            <Select
+              w={{ base: "100%", md: "200px" }}
+              value={category}
+              onChange={handleCategoryChange}
+              size={{ base: "sm", md: "md" }}
+            >
               <option value="popular">Popular</option>
               <option value="top_rated">Top Rated</option>
               <option value="airing_today">Airing Today</option>
@@ -76,7 +83,7 @@ const Shows = () => {
           </FormControl>
         </Flex>
       </Container>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
         {shows.map((show) => (
           <div
             key={show.id}
@@ -88,20 +95,32 @@ const Shows = () => {
               alt={show.name}
               className="w-full h-auto rounded-md"
             />
-            <h3 className="text-lg font-semibold mt-2">{show.name}</h3>
-            <p className="text-sm">{show.first_air_date}</p>
+            <h3 className="text-sm sm:text-lg font-semibold mt-2 truncate">
+              {show.name}
+            </h3>
+            <p className="text-xs sm:text-sm">{show.first_air_date}</p>
           </div>
         ))}
       </div>
 
-      <Flex justifyContent="center" my="4">
-        <Button onClick={prevPage} disabled={currentPage === 1} mr="2">
+      <Flex justifyContent="center" my="4" flexWrap="wrap" gap="2">
+        <Button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          mr={{ base: 1, md: 2 }}
+          size={{ base: "sm", md: "md" }}
+        >
           Previous
         </Button>
-        <p>
+        <p className="flex items-center text-sm sm:text-md">
           Page {currentPage} of {totalPages}
         </p>
-        <Button onClick={nextPage} disabled={currentPage === totalPages} ml="2">
+        <Button
+          onClick={nextPage}
+          disabled={currentPage === totalPages}
+          ml={{ base: 1, md: 2 }}
+          size={{ base: "sm", md: "md" }}
+        >
           Next
         </Button>
       </Flex>

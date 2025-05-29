@@ -1,181 +1,199 @@
 const Watchlist = require("../models/Watchlist");
 
+// Create a new watchlist
 exports.createWatchlist = async (req, res) => {
   try {
-    //Extract user ID
-    const userId = req.user.id;
-    if (!userId) {
-      return res.status(401).json({ message: "Authorization Required" });
+    const { name, description } = req.body;
+
+    // Basic validation
+    if (!name) {
+      return res.status(400).json({ message: "Watchlist name is required" });
     }
 
-    //Validate the request body
-    const { watchlistName } = req.body;
-    if (!watchlistName || watchlistName.trim() === "") {
-      return res.status(400).json({ message: "Watchlist name is required." });
-    }
-
-    //Create a new watchlist instance
+    // Create new watchlist
     const newWatchlist = new Watchlist({
-      userId: userId,
-      name: watchlistName,
+      name,
+      description,
+      userId: req.user.id, // Assuming req.user is set by auth middleware
       items: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
-    //Save the new watchlist instance to the database
-    await newWatchlist.save();
-    return res.status(201).json(newWatchlist);
-  } catch (err) {
-    console.error(err);
-    //Catch any other errors
-    console.error(err);
-    return res.status(500).json({ message: "An unexpected error occurred" });
+    // Save to database
+    const savedWatchlist = await newWatchlist.save();
+
+    res.status(201).json(savedWatchlist);
+  } catch (error) {
+    console.error("Error creating watchlist:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-//Function to get watchlist from database
-exports.getWatchlist = async (req, res) => {
-  const userId = req.user.id; // Extract the user ID from the request object to find user's desired watchlist
+// Get all watchlists for a user
+exports.getAllWatchlists = async (req, res) => {
   try {
-    const watchlist = await Watchlist.findOne({ userId }); // Fetch the watchlist for the given user ID from the database
-    res.json(watchlist); // Send the retrieved watchlist as a JSON response
-  } catch (err) {
-    res.status(500).json({ error: "Server error" }); //Handle any errors that occur during the database query
+    const watchlists = await Watchlist.find({ userId: req.user.id });
+    res.json(watchlists);
+  } catch (error) {
+    console.error("Error fetching watchlists:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Function to Add an item to the watchlist
-exports.addItemToWatchlist = async (req, res) => {
+// Get a single watchlist by ID
+exports.getWatchlistById = async (req, res) => {
   try {
-    //  Extract user ID (assuming authentication middleware has set req.user)
-    const userId = req.user.id;
-    if (!userId) {
-      return res.status(401).json({ message: "Authorization Required" });
-    }
-
-    // Extract watchlistId and item from request body and check if both watchlistId and item are provided
-    const { watchlistId, item } = req.body;
-    if (!watchlistId || !item) {
-      return res
-        .status(400)
-        .json({ message: "Watchlist ID and item are required" });
-    }
-
-    // Find the watchlist that belongs to the user. If watchlist is not found, return a 404 error
     const watchlist = await Watchlist.findOne({
-      _id: watchlistId,
-      userId: userId,
+      _id: req.params.id,
+      userId: req.user.id,
     });
+
     if (!watchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    // Check if the item already exists in the watchlist to avoid duplication. Returns error if item exists already
-    const itemExists = watchlist.items.some(
-      (watchlistItem) => watchlistItem.id === item.id
-    );
-    if (itemExists) {
-      return res
-        .status(409)
-        .json({ message: "Item already exists in the watchlist" });
-    }
-
-    // If item doesn't exist, add it to the watchlist's items array
-    watchlist.items.push(item);
-    // Update the updatedAt field to reflect the modification
-    watchlist.updatedAt = new Date();
-
-    // Save the updated watchlist
-    await watchlist.save();
-
-    // Return success response
-    return res.status(200).json({
-      message: "Item added to watchlist successfully",
-      watchlist,
-    });
+    res.json(watchlist);
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Failed to add to watchlist", error }); // If there is an error during the process, respond with a 500 status and an error message
+    console.error("Error fetching watchlist:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-//Update an existing watchlist
+// Update a watchlist
 exports.updateWatchlist = async (req, res) => {
   try {
-    //  Extract user ID (assuming authentication middleware has set req.user), otherwise returns error if user is not authenticated
-    const userId = req.user.id;
-    if (!userId) {
-      return res.status(401).json({ message: "Authorization Required" });
+    const { name, description } = req.body;
+
+    // Basic validation
+    if (!name) {
+      return res.status(400).json({ message: "Watchlist name is required" });
     }
 
-    const { watchlistId, newWatchlistName } = req.body;
+    // Find and update the watchlist
+    const updatedWatchlist = await Watchlist.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      {
+        name,
+        description,
+        updatedAt: Date.now(),
+      },
+      { new: true }
+    );
 
-    //Check if both watchlistId and newWatchlistName are provided
-    if (!watchlistId || !newWatchlistName || newWatchlistName.trim() === "") {
-      return res
-        .status(400)
-        .json({ message: "Watchlist ID and new name are required" });
-    }
-
-    //Find the watchlist that belongs to the user
-    const watchlist = await Watchlist.findOne({
-      _id: watchlistId,
-      userId: userId,
-    });
-
-    // If watchlist is not found, return a 404 error
-    if (!watchlist) {
+    if (!updatedWatchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    // Update the watchlist name and updatedAt field
-    watchlist.name = newWatchlistName;
-    watchlist.updatedAt = new Date();
-
-    //Save the updated watchlist
-    await watchlist.save();
-
-    //Return success response
-    return res.status(200).json({
-      message: "Watchlist updated successfully",
-      watchlist,
-    });
+    res.json(updatedWatchlist);
   } catch (error) {
-    // Handle any unexpected errors
-    console.error(error);
-    return res.status(500).json({ message: "An unexpected error occurred" });
+    console.error("Error updating watchlist:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Delete the watchlist
+// Delete a watchlist
 exports.deleteWatchlist = async (req, res) => {
-  const userId = req.user.id;
   try {
-    if (!userId) {
-      return res.status(401).json({ message: "Authorization Required" });
-    }
-    //Validate request parameters (watchlistId)
-    const { watchlistId } = req.params;
-    if (!watchlistId) {
-      return res.status(400).json({ message: "Watchlist ID is missing" });
+    const deletedWatchlist = await Watchlist.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!deletedWatchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    //Find the watchlist that belongs to the user
+    res.json({ message: "Watchlist deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting watchlist:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Add an item to a watchlist
+exports.addItemToWatchlist = async (req, res) => {
+  try {
+    const { movieId, title, posterPath, mediaType, releaseDate } = req.body;
+
+    // Basic validation
+    if (!movieId || !title || !mediaType) {
+      return res
+        .status(400)
+        .json({ message: "Movie ID, title, and media type are required" });
+    }
+
+    // Find the watchlist
     const watchlist = await Watchlist.findOne({
-      _id: watchlistId,
-      userId: userId,
+      _id: req.params.id,
+      userId: req.user.id,
     });
-    // If watchlist is not found, return a 404 error
+
     if (!watchlist) {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    //Delete the watchlist when found
-    await Watchlist.deleteOne({ _id: watchlist._id });
-    
-    return res.status(200).json({ message: "Watchlist deleted successfully" }); //Return success message after deleting watchlist
+    // Check if item already exists in watchlist
+    const itemExists = watchlist.items.some(
+      (item) => item.movieId === movieId && item.mediaType === mediaType
+    );
+
+    if (itemExists) {
+      return res
+        .status(400)
+        .json({ message: "Item already exists in watchlist" });
+    }
+
+    // Add new item
+    const newItem = {
+      movieId,
+      title,
+      posterPath,
+      mediaType,
+      releaseDate,
+      addedAt: Date.now(),
+    };
+
+    watchlist.items.push(newItem);
+    watchlist.updatedAt = Date.now();
+
+    await watchlist.save();
+
+    res.status(201).json(newItem);
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete watchlist", error });
+    console.error("Error adding item to watchlist:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Remove an item from a watchlist
+exports.removeItemFromWatchlist = async (req, res) => {
+  try {
+    const watchlist = await Watchlist.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    // Find the item index
+    const itemIndex = watchlist.items.findIndex(
+      (item) => item._id.toString() === req.params.itemId
+    );
+
+    if (itemIndex === -1) {
+      return res.status(404).json({ message: "Item not found in watchlist" });
+    }
+
+    // Remove the item
+    watchlist.items.splice(itemIndex, 1);
+    watchlist.updatedAt = Date.now();
+
+    await watchlist.save();
+
+    res.json({ message: "Item removed from watchlist" });
+  } catch (error) {
+    console.error("Error removing item from watchlist:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };

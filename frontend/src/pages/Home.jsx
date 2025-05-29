@@ -7,6 +7,7 @@ import Loading from "../components/Loading.jsx";
 
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
+console.log("API Key loaded:", API_KEY ? "Yes" : "No");
 const BASE_URL = "https://api.themoviedb.org/3";
 const ITEMS_PER_PAGE = 30; // Number of items per page
 
@@ -35,21 +36,33 @@ const Home = () => {
   const fetchTrending = async (timeframe, page) => {
     try {
       setLoading(true); //Sets loading to true while TV show data is being fetched
+
+          console.log(
+            `Fetching trending data: ${BASE_URL}/trending/all/${timeframe}?api_key=XXX&page=${page}`
+          );
+
       const response = await axios.get(
         `${BASE_URL}/trending/all/${timeframe}?api_key=${API_KEY}&page=${page}`
       );
-      setTrending(response.data.results);
-      // Calculate total pages based on the total number of items and items per page
-      const totalItems = response.data.total_results;
-      const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
-      setTotalPages(totalPagesCount);
-      setLoading(false);
+          if (response.data && response.data.results) {
+            setTrending(response.data.results);
+            // Calculate total pages based on the total number of items and items per page
+            const totalItems = response.data.total_results;
+            const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
+            setTotalPages(totalPagesCount);
+          } else {
+            console.error("Invalid API response format:", response.data);
+            setTrending([]);
+          }
+
+          setLoading(false);
     } catch (error) {
       console.error(
         "Error fetching trending data for trending movies & tv shows:",
-        error
+        error.response ? error.response.data : error.message
       );
       setLoading(false);
+      setTrending([]);
     } 
   };
 
@@ -73,14 +86,22 @@ const Home = () => {
 
   return (
     <>
-      <Container maxW="container.xl">
-        <Flex alignItems="center" justifyContent="center" my="10">
+      <Container maxW="container.xl" px={{ base: 2, md: 4 }}>
+        <Heading size={{ base: "lg", md: "xl" }}>Home</Heading>
+        <Flex
+          alignItems="center"
+          justifyContent="center"
+          my={{ base: 5, md: 10 }}
+        >
           <FormControl>
-            <FormLabel>Find out what is trending</FormLabel>
+            <FormLabel fontSize={{ base: "sm", md: "md" }}>
+              Find out what is trending
+            </FormLabel>
             <Select
-              w={{ base: "100%", md: "200px" }} // Responsive width for Select component
+              w={{ base: "100%", md: "200px" }}
               value={timeframe}
               onChange={handleTimeframeChange}
+              size={{ base: "sm", md: "md" }}
             >
               <option value="day">Today</option>
               <option value="week">This Week</option>
@@ -92,41 +113,57 @@ const Home = () => {
       {/* Display fetched trending data as cards */}
       {loading ? (
         <Loading />
-      ) : (
-        <Flex flexWrap="wrap" justifyContent="center" p="4">
+      ) : trending.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
           {trending.map((item) => (
             <Link
               to={`/details/${item.id}`}
               state={{ type: item.media_type }}
               key={item.id}
+              className="flex justify-center"
             >
               <div
                 className="movie-card border rounded-lg shadow-lg p-2"
-                style={{ maxWidth: "300px" }}
+                style={{ maxWidth: "100%" }}
               >
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                  alt={item.title || item.name}
-                  className="w-full h-auto rounded-md"
-                />
-                <h3 className="text-lg font-semibold mt-2">
+                {item.poster_path ? (
+                  <img
+                    src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                    alt={item.title || item.name}
+                    className="w-full h-auto rounded-md"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded-md">
+                    <p className="text-center">No Image</p>
+                  </div>
+                )}
+                <h3 className="text-sm sm:text-lg font-semibold mt-2 truncate">
                   {item.title || item.name}
                 </h3>
-                <p className="text-sm">
-                  {item.release_date || item.first_air_date}
+                <p className="text-xs sm:text-sm">
+                  {item.release_date || item.first_air_date || "Unknown date"}
                 </p>
               </div>
             </Link>
           ))}
-        </Flex>
+        </div>
+      ) : (
+        <div className="text-center p-8">
+          <p>No movies or shows found. Please try a different selection.</p>
+        </div>
       )}
 
       {/* Pagination controls */}
-      <Flex justifyContent="center" my="4">
-        <Button onClick={prevPage} disabled={currentPage === 1} mr="2">
+      <Flex justifyContent="center" my="4" flexWrap="wrap" gap="2">
+        <Button
+          onClick={prevPage}
+          disabled={currentPage === 1}
+          mr={{ base: 1, md: 2 }}
+          size={{ base: "sm", md: "md" }}
+        >
           Previous
         </Button>
-        <p>
+        <p className="flex items-center text-sm sm:text-md">
           Page {currentPage} of {totalPages}
         </p>
         <Button
@@ -134,7 +171,8 @@ const Home = () => {
           disabled={
             trending.length < ITEMS_PER_PAGE || currentPage === totalPages
           }
-          ml="2"
+          ml={{ base: 1, md: 2 }}
+          size={{ base: "sm", md: "md" }}
         >
           Next
         </Button>
