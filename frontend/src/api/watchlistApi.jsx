@@ -89,10 +89,11 @@ export const deleteWatchlistAPI = async (watchlistId) => {
         return response.data;
     } catch (error) {
         const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
-          "Failed to delete watchlist.";
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            "Failed to delete watchlist.";
         throw new Error(message);
+    }
 }
 
 //Function to remove item from watchlist by sending a DELETE request

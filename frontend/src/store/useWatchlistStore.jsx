@@ -9,7 +9,6 @@ import {
   getWatchlistByIdAPI,
 } from "../api/watchlistApi";
 
-
 export const useWatchlistStore = create((set) => ({
   //Initial state
   watchlist: [], //watchlists are initially empty
@@ -147,4 +146,3 @@ export const useWatchlistStore = create((set) => ({
     }
   },
 }));
-
