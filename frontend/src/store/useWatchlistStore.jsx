@@ -9,7 +9,7 @@ import {
   getWatchlistByIdAPI,
 } from "../api/watchlistApi";
 
-export const useWatchlistStore = create((set) => ({
+export const useWatchlistStore = create((set, get) => ({
   //Initial state
   watchlist: [], //watchlists are initially empty
   currentWatchlist: null,
@@ -144,5 +144,19 @@ export const useWatchlistStore = create((set) => ({
       set({ error: error.message, loading: false }); //catch any other errors
       return false; // Indicate failure
     }
+  },
+
+  ensureWatchedWatchlist: async () => {
+    let watched = null;
+    // Find "Watched" watchlist in state
+    watched = get().watchlist.find((wl) => wl.name === "Watched");
+    if (!watched) {
+      // Create if not found (createWatchlist already adds it to state)
+      watched = await get().createWatchlist(
+        "Watched",
+        "All items you have watched"
+      );
+    }
+    return watched;
   },
 }));

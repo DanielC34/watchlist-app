@@ -33,7 +33,6 @@ const WatchlistDetail = () => {
   const navigate = useNavigate();
   const toast = useToast();
 
-  const [redirectAfterDelete, setRedirectAfterDelete] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
 
@@ -46,6 +45,9 @@ const WatchlistDetail = () => {
     removeItemFromWatchlist,
     deleteWatchlist,
     getWatchlist,
+    addItemToWatchlist,
+    watchlist,
+    ensureWatchedWatchlist,
   } = useWatchlistStore();
 
   useEffect(() => {
@@ -53,6 +55,13 @@ const WatchlistDetail = () => {
       fetchWatchlistById(id);
     }
   }, [id, isAuthenticated, fetchWatchlistById]);
+
+  // --- "Watched" watchlist logic
+  // Get the "Watched" watchlist and its item IDs
+  const watchedWatchlist = watchlist.find((wl) => wl.name === "Watched");
+  const watchedItemIds = watchedWatchlist
+    ? watchedWatchlist.items.map((item) => item._id)
+    : [];
 
   const openDeleteModal = () => setIsDeleteModalOpen(true);
   const closeDeleteModal = () => {
@@ -105,6 +114,37 @@ const WatchlistDetail = () => {
         title: "Error removing item",
         status: "error",
         duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  // --- Mark as watched handler (NEW/CHANGED) ---
+  const handleMarkAsWatched = async (item) => {
+    try {
+      const watched = await ensureWatchedWatchlist();
+      if (watched.items.some((watchedItem) => watchedItem._id === item._id)) {
+        toast({
+          title: "Already in Watched",
+          status: "info",
+          duration: 2000,
+          isClosable: true,
+        });
+        return;
+      }
+      await addItemToWatchlist(watched._id, item);
+      toast({
+        title: "Added to Watched!",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Could not add to Watched.",
+        status: "error",
+        duration: 2000,
         isClosable: true,
       });
     }
@@ -236,45 +276,66 @@ const WatchlistDetail = () => {
 
         {currentWatchlist.items && currentWatchlist.items.length > 0 ? (
           <Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={4}>
-            {currentWatchlist.items.map((item) => (
-              <Box
-                key={item._id}
-                borderRadius="md"
-                overflow="hidden"
-                bg="gray.700"
-                position="relative"
-              >
-                <Box position="absolute" top={2} right={2} zIndex={1}>
-                  <IconButton
-                    icon={<FaTrash />}
-                    aria-label="Remove from watchlist"
-                    size="sm"
-                    colorScheme="red"
-                    onClick={() => handleRemoveItem(item._id)}
+            {currentWatchlist.items.map((item) => {
+              //Determine watched state for icon
+              const isWatched = watchedItemIds.includes(item._id);
+              return (
+                <Box
+                  key={item._id}
+                  borderRadius="md"
+                  overflow="hidden"
+                  bg="gray.700"
+                  position="relative"
+                >
+                  {/* Remove item */}
+                  <Box position="absolute" top={2} right={2} zIndex={1}>
+                    <IconButton
+                      icon={<FaTrash />}
+                      aria-label="Remove from watchlist"
+                      size="sm"
+                      colorScheme="red"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click
+                        handleRemoveItem(item._id);
+                      }}
+                    />
+                  </Box>
+                  {/* Mark as watched */}
+                  <Box position="absolute" top={2} left={2} zIndex={1}>
+                    <IconButton
+                      icon={
+                        isWatched ? (
+                          <FaBookmark color="#E53E3E" size={20} />
+                        ) : (
+                          <FaRegBookmark color="#A0AEC0" size={20} />
+                        )
+                      }
+                      aria-label={isWatched ? "Watched" : "Mark as watched"}
+                      size="sm"
+                      variant="ghost"
+                      isDisabled={isWatched}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent card click
+                        handleMarkAsWatched(item);
+                      }}
+                    />
+                  </Box>
+                  <img
+                    src={`https://image.tmdb.org/t/p/w500${item.posterPath}`}
+                    alt={item.title}
+                    style={{ width: "100%", height: "auto" }}
                   />
+                  <Box p={2}>
+                    <Text fontWeight="bold" noOfLines={1}>
+                      {item.title}
+                    </Text>
+                    <Text fontSize="sm" color="gray.400">
+                      {item.mediaType === "movie" ? "Movie" : "TV Show"}
+                    </Text>
+                  </Box>
                 </Box>
-                <Box position="absolute" top={2} left={2} zIndex={1}>
-                  {item.watched ? (
-                    <FaBookmark color="#E53E3E" size={20} />
-                  ) : (
-                    <FaRegBookmark color="#A0AEC0" size={20} />
-                  )}
-                </Box>
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${item.posterPath}`}
-                  alt={item.title}
-                  style={{ width: "100%", height: "auto" }}
-                />
-                <Box p={2}>
-                  <Text fontWeight="bold" noOfLines={1}>
-                    {item.title}
-                  </Text>
-                  <Text fontSize="sm" color="gray.400">
-                    {item.mediaType === "movie" ? "Movie" : "TV Show"}
-                  </Text>
-                </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Grid>
         ) : (
           <Box p={8} textAlign="center" borderRadius="md" bg="gray.700">
