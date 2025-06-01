@@ -173,11 +173,8 @@ const Navbar = () => {
           <NavLink to="/shows" icon={<FaTv />}>
             TV Shows
           </NavLink>
-          <NavLink to="/search" icon={<FaSearch />}>
+          <NavLink to="/history" icon={<FaSearch />}>
             Search
-          </NavLink>
-          <NavLink to="/history" icon={<FaHistory />}>
-            History
           </NavLink>
 
           <Box mt={4} mb={4}>

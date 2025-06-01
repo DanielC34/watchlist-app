@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Container,
@@ -18,36 +18,30 @@ const BASE_MOVIE_URL = "https://api.themoviedb.org/3/movie";
 const BASE_TV_URL = "https://api.themoviedb.org/3/tv";
 
 const Details = () => {
-  const { id } = useParams(); // Get the ID from the URL
-  const navigate = useNavigate(); // Use useNavigate instead of useHistory
-  const { state } = useLocation(); // Provide a default empty object
+  // Get both the type ("movie" or "tv") and the id from the URL
+  const { details, id } = useParams();
+  const navigate = useNavigate();
 
-  const [details, setDetails] = useState(null);
+  const [itemDetails, setItemDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  // const watchlist = useWatchlistStore(state => state.watchlist); // Use useWatchlistStore hook to access watchlist state and actions
-  // const addItemToWatchlist = useWatchlistStore(state => state.addItemToWatchlist); // Use useWatchlistStore hook for addItemToWatchlist
-  // const removeItemFromWatchlist = useWatchlistStore(state => state.removeItemFromWatchlist); // Use useWatchlistStore hook for removeItemFromWatchlist
-  // const deleteWatchlist = useWatchlistStore(state => state.deleteWatchlist); // Use useWatchlistStore hook for deleteWatchlist
-  // const createWatchlist = useWatchlistStore(state => state.createWatchlist); // Use useWatchlistStore hook for createWatchlist
-  // const getWatchlist = useWatchlistStore(state => state.getWatchlist); // Use useWatchlistStore hook for getWatchlist
-  // const updateWatchlist = useWatchlistStore(state => state.updateWatchlist); // Use useWatchlistStore hook for updateWatchlist
 
   useEffect(() => {
     const fetchDetails = async () => {
       try {
-        if (!state || !state.type) {
-          console.log("Type is not defined in state");
+        // Use the route param to determine type
+        if (!details) {
+          console.log("Type is not defined in route param");
           return;
         }
 
         const url =
-          state.type === "movie"
+          details === "movie"
             ? `${BASE_MOVIE_URL}/${id}?api_key=${API_KEY}`
             : `${BASE_TV_URL}/${id}?api_key=${API_KEY}`;
+      
 
         const response = await axios.get(url);
-        setDetails(response.data);
+        setItemDetails(response.data);
       } catch (error) {
         console.error("Error fetching details:", error);
       } finally {
@@ -56,13 +50,13 @@ const Details = () => {
     };
 
     fetchDetails();
-  }, [id, state]);
+  }, [id, details]);
 
   if (loading) {
     return <Spinner size="xl" />;
   }
 
-  if (!details) {
+  if (!itemDetails) {
     return <Text>Details not found</Text>;
   }
 
@@ -87,32 +81,32 @@ const Details = () => {
           mx={{ base: "auto", md: 0 }}
         >
           <Image
-            src={`https://image.tmdb.org/t/p/w500${details.poster_path}`}
-            alt={details.title || details.name}
+            src={`https://image.tmdb.org/t/p/w500${itemDetails.poster_path}`}
+            alt={itemDetails.title || itemDetails.name}
             borderRadius="md"
             w="100%"
           />
         </Box>
         <Box>
           <Heading as="h1" size={{ base: "lg", md: "xl" }} mb="4">
-            {details.title || details.name}
+            {itemDetails.title || itemDetails.name}
           </Heading>
           <Text fontSize={{ base: "md", md: "lg" }} mb="4">
-            {details.overview}
+            {itemDetails.overview}
           </Text>
           <Text fontSize={{ base: "sm", md: "md" }}>
             <strong>Release Date:</strong>{" "}
-            {details.release_date || details.first_air_date}
+            {itemDetails.release_date || itemDetails.first_air_date}
           </Text>
           <Text fontSize={{ base: "sm", md: "md" }}>
-            <strong>Rating:</strong> {details.vote_average}
+            <strong>Rating:</strong> {itemDetails.vote_average}
           </Text>
           <Text fontSize={{ base: "sm", md: "md" }}>
             <strong>Genres:</strong>{" "}
-            {details.genres.map((genre) => genre.name).join(", ")}
+            {itemDetails.genres.map((genre) => genre.name).join(", ")}
           </Text>
           <div>
-            <AddToWatchlistButton item={details} />
+            <AddToWatchlistButton item={itemDetails} />
           </div>
         </Box>
       </Flex>
