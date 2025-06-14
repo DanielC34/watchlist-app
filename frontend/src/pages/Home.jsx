@@ -6,77 +6,86 @@ import {
   Select,
   Button,
   Heading,
+  useToast,
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useToast } from "@chakra-ui/react";
 import axios from "axios";
 import Loading from "../components/Loading.jsx";
 
+// Environment variables
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
-console.log("API Key loaded:", API_KEY ? "Yes" : "No");
-const BASE_URL = "https://api.themoviedb.org/3";
-const ITEMS_PER_PAGE = 30; // Number of items per page
+const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
+const IMAGE_BASE_URL =
+  import.meta.env.VITE_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w500";
+const ITEMS_PER_PAGE = parseInt(import.meta.env.VITE_ITEMS_PER_PAGE) || 30;
+
+// Create axios instance with defaults
+const api = axios.create({
+  baseURL: BASE_URL,
+  timeout: 10000,
+  params: {
+    api_key: API_KEY,
+  },
+});
 
 const Home = () => {
-  const [trending, setTrending] = useState([]); //stores data for trending movies/tv shows
-  const [timeframe, setTimeframe] = useState("day"); //Stores the selected time frame ('day' for today, 'week' for this week).
-  const [currentPage, setCurrentPage] = useState(1); // Current page number
-  const [totalPages, setTotalPages] = useState(0); // Total number of pages
+  const [trending, setTrending] = useState([]);
+  const [timeframe, setTimeframe] = useState("day");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const location = useLocation(); // Get the current location to check for state
+  const location = useLocation();
   const toast = useToast();
 
-  // Check if there is a state passed from the previous page
   useEffect(() => {
     if (location.state?.toast) {
       toast(location.state.toast);
     }
   }, [location, toast]);
 
+  const fetchTrending = useCallback(
+    async (timeframe, page) => {
+      try {
+        setLoading(true);
+
+        const response = await api.get(`/trending/all/${timeframe}`, {
+          params: { page },
+        });
+
+        if (response.data?.results) {
+          setTrending(response.data.results);
+          const totalItems = response.data.total_results;
+          const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
+          setTotalPages(totalPagesCount);
+        } else {
+          throw new Error("Invalid API response format");
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description:
+            "Failed to fetch trending items. Please try again later.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+        setTrending([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast]
+  );
+
   useEffect(() => {
     fetchTrending(timeframe, currentPage);
-  }, [timeframe, currentPage]);
+  }, [timeframe, currentPage, fetchTrending]);
 
-  // Function to fetch trending data from TMDb API
-  const fetchTrending = async (timeframe, page) => {
-    try {
-      setLoading(true); //Sets loading to true while TV show data is being fetched
-
-      console.log(
-        `Fetching trending data: ${BASE_URL}/trending/all/${timeframe}?api_key=XXX&page=${page}`
-      );
-
-      const response = await axios.get(
-        `${BASE_URL}/trending/all/${timeframe}?api_key=${API_KEY}&page=${page}`
-      );
-      if (response.data && response.data.results) {
-        setTrending(response.data.results);
-        // Calculate total pages based on the total number of items and items per page
-        const totalItems = response.data.total_results;
-        const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
-        setTotalPages(totalPagesCount);
-      } else {
-        console.error("Invalid API response format:", response.data);
-        setTrending([]);
-      }
-
-      setLoading(false);
-    } catch (error) {
-      console.error(
-        "Error fetching trending data for trending movies & tv shows:",
-        error.response ? error.response.data : error.message
-      );
-      setLoading(false);
-      setTrending([]);
-    }
-  };
-
-  // Function to handle timeframe selection change
   const handleTimeframeChange = (e) => {
-    setTimeframe(e.target.value); // Update timeframe state based on selection
-    setCurrentPage(1); // Reset to first page when timeframe changes
+    setTimeframe(e.target.value);
+    setCurrentPage(1);
   };
 
   const nextPage = () => {
@@ -89,6 +98,10 @@ const Home = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
+  };
+
+  const getImageUrl = (path) => {
+    return path ? `${IMAGE_BASE_URL}${path}` : null;
   };
 
   return (
@@ -124,8 +137,7 @@ const Home = () => {
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
           {trending.map((item) => (
             <Link
-              to={`/details/${item.id}`}
-              state={{ type: item.media_type }}
+              to={`/${item.media_type}/${item.id}`}
               key={item.id}
               className="flex justify-center"
             >
@@ -135,9 +147,10 @@ const Home = () => {
               >
                 {item.poster_path ? (
                   <img
-                    src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                    src={getImageUrl(item.poster_path)}
                     alt={item.title || item.name}
                     className="w-full h-auto rounded-md"
+                    loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded-md">
