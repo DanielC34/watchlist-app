@@ -10,28 +10,36 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://your-vercel-app.vercel.app",
+];
+
 // // Middleware
 app.use(cors());
 app.use(express.json());
 
 // Session middleware setup
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
-  cookie: { secure: false, httpOnly: true } // Adjust 'secure' based on your environment (true for HTTPS)
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+    cookie: {
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+    }, // Adjust 'secure' based on your environment (true for HTTPS)
+  })
+);
 
 // Database Connection
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() =>
-    console.log("MongoDB connected", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-  )
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
 // // Routes
