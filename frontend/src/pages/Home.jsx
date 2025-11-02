@@ -21,6 +21,24 @@ const IMAGE_BASE_URL =
   import.meta.env.VITE_TMDB_IMAGE_BASE_URL || "https://image.tmdb.org/t/p/w500";
 const ITEMS_PER_PAGE = parseInt(import.meta.env.VITE_ITEMS_PER_PAGE) || 30;
 
+// Validate URLs to prevent SSRF attacks
+const validateUrl = (url, allowedHosts) => {
+  try {
+    const urlObj = new URL(url);
+    return allowedHosts.includes(urlObj.hostname);
+  } catch {
+    return false;
+  }
+};
+
+if (!validateUrl(BASE_URL, ['api.themoviedb.org'])) {
+  throw new Error('Invalid TMDB API URL - potential SSRF attack');
+}
+
+if (!validateUrl(IMAGE_BASE_URL, ['image.tmdb.org'])) {
+  throw new Error('Invalid TMDB Image URL - potential SSRF attack');
+}
+
 // Create axios instance with defaults
 const api = axios.create({
   baseURL: BASE_URL,
@@ -50,6 +68,12 @@ const Home = () => {
     async (timeframe, page) => {
       try {
         setLoading(true);
+
+        // Validate timeframe to prevent SSRF
+        const allowedTimeframes = ['day', 'week'];
+        if (!allowedTimeframes.includes(timeframe)) {
+          throw new Error('Invalid timeframe parameter');
+        }
 
         const response = await api.get(`/trending/all/${timeframe}`, {
           params: { page },

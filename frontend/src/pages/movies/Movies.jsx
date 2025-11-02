@@ -14,6 +14,20 @@ const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_MOVIE_URL = "https://api.themoviedb.org/3";
 const ITEMS_PER_PAGE = 30; // Number of items per page
 
+// Validate BASE_MOVIE_URL to prevent SSRF attacks
+const validateUrl = (url) => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname === 'api.themoviedb.org';
+  } catch {
+    return false;
+  }
+};
+
+if (!validateUrl(BASE_MOVIE_URL)) {
+  throw new Error('Invalid TMDB API URL - potential SSRF attack');
+}
+
 const Movies = () => {
   const [movies, setMovies] = useState([]);
   const [category, setCategory] = useState("popular");
@@ -23,6 +37,17 @@ const Movies = () => {
 
   const fetchMovies = async (category, page) => {
     try {
+      // Validate category to prevent SSRF
+      const allowedCategories = ['popular', 'top_rated', 'upcoming', 'now_playing'];
+      if (!allowedCategories.includes(category)) {
+        throw new Error('Invalid category parameter');
+      }
+      
+      // Validate page parameter to prevent SSRF
+      if (!Number.isInteger(page) || page < 1 || page > 1000) {
+        throw new Error('Invalid page parameter');
+      }
+      
       const response = await axios.get(
         `${BASE_MOVIE_URL}/movie/${category}?api_key=${API_KEY}&page=${page}`
       );
@@ -31,7 +56,7 @@ const Movies = () => {
       const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
       setTotalPages(totalPagesCount);
     } catch (error) {
-      console.error(`Error fetching ${category} movies:`, error);
+      console.error('Error fetching movies:', error);
     }
   };
 
@@ -57,7 +82,7 @@ const Movies = () => {
   };
 
   const handleCardClick = (id) => {
-    navigate(`/details/${id}`, { state: { type: "movie" } });
+    navigate(`/movie/${id}`);
   };
 
   return (

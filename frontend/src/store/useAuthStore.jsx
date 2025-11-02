@@ -18,10 +18,22 @@ const useAuthStore = create((set) => ({
   // Function to handle user signup
   signup: async (username, email, password) => {
     try {
+      // Get CSRF token first
+      const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
+        withCredentials: true
+      });
+      const csrfToken = csrfResponse.data.csrfToken;
+
       const response = await axios.post(`${ROOT_URL}/api/auth/register`, {
         username,
         email,
         password,
+        _csrf: csrfToken,
+      }, {
+        withCredentials: true,
+        headers: {
+          'X-CSRF-Token': csrfToken
+        }
       });
 
       set({
@@ -30,9 +42,15 @@ const useAuthStore = create((set) => ({
         error: null,
       });
 
+      // Validate and sanitize user data before storing
+      const sanitizedUser = {
+        username: (response.data.user.username || '').replace(/[<>"'&]/g, ''),
+        email: (response.data.user.email || '').replace(/[<>"'&]/g, '')
+      };
+      
       // Store the token and user data in localStorage for persistence
       localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      localStorage.setItem("user", JSON.stringify(sanitizedUser));
     } catch (err) {
       set({
         user: { username: "", email: "" },
@@ -46,9 +64,21 @@ const useAuthStore = create((set) => ({
   // Function to handle user login
   login: async (email, password) => {
     try {
+      // Get CSRF token first
+      const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
+        withCredentials: true
+      });
+      const csrfToken = csrfResponse.data.csrfToken;
+
       const response = await axios.post(`${ROOT_URL}/api/auth/login`, {
         email,
         password,
+        _csrf: csrfToken,
+      }, {
+        withCredentials: true,
+        headers: {
+          'X-CSRF-Token': csrfToken
+        }
       });
 
       console.log("Login response:", response); // Debug log
@@ -60,9 +90,15 @@ const useAuthStore = create((set) => ({
           error: null,
         });
 
+        // Validate and sanitize user data before storing
+        const sanitizedUser = {
+          username: (response.data.user.username || '').replace(/[<>"'&]/g, ''),
+          email: (response.data.user.email || '').replace(/[<>"'&]/g, '')
+        };
+        
         // Store the token and user data in localStorage for persistence
         localStorage.setItem("token", response.data.token);
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        localStorage.setItem("user", JSON.stringify(sanitizedUser));
       } else {
         set({
           user: { username: "", email: "" },
@@ -126,16 +162,25 @@ const useAuthStore = create((set) => ({
   // Function to update user profile picture
   updateUserProfilePicture: async (file) => {
     try {
+      // Get CSRF token first
+      const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
+        withCredentials: true
+      });
+      const csrfToken = csrfResponse.data.csrfToken;
+
       const formData = new FormData();
       formData.append("profilePicture", file);
+      formData.append("_csrf", csrfToken);
 
       const response = await axios.post(
         `${ROOT_URL}/api/users/update-profile-picture`,
         formData,
         {
+          withCredentials: true,
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            'X-CSRF-Token': csrfToken
           },
         }
       );

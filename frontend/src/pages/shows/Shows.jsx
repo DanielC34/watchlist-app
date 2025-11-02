@@ -57,7 +57,7 @@ const Shows = () => {
   };
 
   const handleCardClick = (id) => {
-    navigate(`/details/${id}`, { state: { type: "tv" } });
+    navigate(`/tv/${id}`);
   };
 
   return (
