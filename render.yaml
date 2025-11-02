@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: filmvault-backend
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: MOVIEDB_API_KEY
+        sync: false
+
+  - type: static
+    name: filmvault-frontend
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_MOVIEDB_API_KEY
+        sync: false
+      - key: VITE_ROOT_URL
+        value: https://filmvault-backend.onrender.com
+      - key: VITE_API_URL
+        value: https://filmvault-backend.onrender.com/api
+      - key: VITE_API_TIMEOUT
+        value: 10000
+      - key: VITE_TMDB_BASE_URL
+        value: https://api.themoviedb.org/3
+      - key: VITE_ITEMS_PER_PAGE
+        value: 30
+      - key: VITE_TMDB_IMAGE_BASE_URL
+        value: https://image.tmdb.org/t/p/w500
