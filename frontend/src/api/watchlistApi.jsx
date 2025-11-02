@@ -1,6 +1,20 @@
 import axios from 'axios';
 
+// Validate BASE_URL to prevent SSRF attacks
+const validateBaseUrl = (url) => {
+  const allowedHosts = ['localhost', '127.0.0.1', 'your-api-domain.com'];
+  try {
+    const urlObj = new URL(url);
+    return allowedHosts.some(host => urlObj.hostname === host || urlObj.hostname.endsWith(`.${host}`));
+  } catch {
+    return false;
+  }
+};
+
 const BASE_URL = import.meta.env.VITE_API_URL;
+if (!validateBaseUrl(BASE_URL)) {
+  throw new Error('Invalid API URL - potential SSRF attack');
+}
 const API_TIMEOUT = import.meta.env.VITE_API_TIMEOUT || 10000;
 
 // Configure axios with default headers and timeout
@@ -50,6 +64,10 @@ export const createWatchlistAPI = async (watchlistName, description) => {
 //Function to add a new watchlist by sending a POST request
 export const addItemToWatchlist = async (watchlistId, item) => {
     try {
+        // Validate watchlistId to prevent SSRF
+        if (!watchlistId || typeof watchlistId !== 'string' || !/^[a-zA-Z0-9]+$/.test(watchlistId)) {
+            throw new Error('Invalid watchlist ID');
+        }
         const response = await api.post(`/watchlist/${watchlistId}/add-item`, item);
         return response.data;
     } catch (error) {

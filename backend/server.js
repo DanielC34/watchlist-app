@@ -1,10 +1,7 @@
 //main entry point of application
 
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
 require("dotenv").config();
 
 const app = express();
@@ -16,24 +13,32 @@ const allowedOrigins = [
 ];
 
 // // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(express.json());
 
 // Session middleware setup
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
     cookie: {
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
-    }, // Adjust 'secure' based on your environment (true for HTTPS)
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
   })
 );
 
 // Database Connection
+const mongoose = require("mongoose");
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -43,9 +48,9 @@ mongoose
   .catch((err) => console.log(err));
 
 // // Routes
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/user", require("./routes/user"));
-app.use("/api/watchlist", require("./routes/watchlist"));
+app.use("/api/auth", () => require("./routes/auth"));
+app.use("/api/user", () => require("./routes/user"));
+app.use("/api/watchlist", () => require("./routes/watchlist"));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

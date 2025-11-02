@@ -1,26 +1,24 @@
 const jwt = require("jsonwebtoken");
-const winston = require("winston");
-const {
-  createUser,
-  findUserByEmail,
-  comparePassword,
-} = require("../services/userService");
 
 // Configure the logger
-const logger = winston.createLogger({
-  level: "error",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: "error.log" }),
-  ],
-});
+const getLogger = () => {
+  const winston = require("winston");
+  return winston.createLogger({
+    level: "error",
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    ),
+    transports: [
+      new winston.transports.Console(),
+      new winston.transports.File({ filename: "error.log" }),
+    ],
+  });
+};
 
 // User registration
 exports.register = async (req, res) => {
+  const { createUser, findUserByEmail } = require("../services/userService");
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
     return res.status(400).json({ error: "Missing required fields" });
@@ -33,7 +31,7 @@ exports.register = async (req, res) => {
 
     const user = await createUser({ username, email, password });
 
-    logger.info(`User created successfully: ${user._id}`);
+    getLogger().info(`User created successfully: ${user._id}`);
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
@@ -48,7 +46,7 @@ exports.register = async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error(`Registration error: ${err.message}`);
+    getLogger().error(`Registration error: ${err.message}`);
     res.status(400).json({
       error: "An error occurred during registration. Please try again.",
     });
@@ -57,6 +55,7 @@ exports.register = async (req, res) => {
 
 // User login
 exports.login = async (req, res) => {
+  const { findUserByEmail, comparePassword } = require("../services/userService");
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -68,7 +67,7 @@ exports.login = async (req, res) => {
   try {
     const user = await findUserByEmail(email);
     if (!user) {
-      logger.error(`Login failed for email: ${email} - User not found`);
+      getLogger().error('Login failed - User not found', { email: email.replace(/[\r\n]/g, '') });
       return res.status(400).json({
         message: "Login not successful",
         error: "User not found",
@@ -84,7 +83,7 @@ exports.login = async (req, res) => {
       });
 
       res.cookie("token", token, { httpOnly: true });
-      logger.info(`User logged in successfully: ${user._id}`);
+      getLogger().info(`User logged in successfully: ${user._id}`);
 
       // Return user details along with the token
       return res.status(200).json({
@@ -96,14 +95,16 @@ exports.login = async (req, res) => {
         },
       });
     } else {
-      logger.error(`Login failed for email: ${email} - Invalid password`);
+      getLogger().error('Login failed - Invalid password', { email: email.replace(/[\r\n]/g, '') });
       return res.status(400).json({
         message: "Login not successful",
         error: "Incorrect password",
       });
     }
   } catch (error) {
-    logger.error(`Login error for email: ${email} - ${error.message}`, {
+    getLogger().error('Login error occurred', {
+      email: email.replace(/[\r\n]/g, ''),
+      error: error.message.replace(/[\r\n]/g, ''),
       stack: error.stack,
     });
     return res.status(500).json({
@@ -121,7 +122,7 @@ exports.logout = (req, res) => {
     secure: true,
   });
 
-  logger.info(
+  getLogger().info(
     `User ${req.user ? req.user.id : "unknown"} logged out at ${new Date()}`
   );
 
