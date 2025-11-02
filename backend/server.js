@@ -9,8 +9,9 @@ const PORT = process.env.PORT || 5000;
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://your-vercel-app.vercel.app",
-];
+  "https://filmvault-frontend.onrender.com",
+  process.env.FRONTEND_URL
+].filter(Boolean);
 
 // // Middleware
 app.use(cors({
@@ -48,6 +49,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // // Routes
+app.use("/api", () => require("./routes/csrf"));
 app.use("/api/auth", () => require("./routes/auth"));
 app.use("/api/user", () => require("./routes/user"));
 app.use("/api/watchlist", () => require("./routes/watchlist"));
