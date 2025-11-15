@@ -102,64 +102,110 @@ const Navbar = () => {
 
   return (
     <>
-      {/* Mobile Header Bar */}
+      {/* Mobile Bottom Navigation */}
       <Box
         position="fixed"
-        top="0"
+        bottom="0"
         left="0"
         right="0"
-        height="60px"
         bg="gray.900"
+        borderTop="1px"
+        borderColor="gray.800"
         display={{ base: "flex", md: "none" }}
+        justifyContent="space-around"
         alignItems="center"
-        px={4}
-        zIndex={30}
-        boxShadow="md"
+        px={2}
+        py={2}
+        zIndex={50}
+        boxShadow="0 -2px 10px rgba(0,0,0,0.3)"
       >
+        <Link to="/">
+          <IconButton
+            icon={<FaHome />}
+            aria-label="Home"
+            variant="ghost"
+            colorScheme={isActive("/") || isActive("/home") ? "red" : "gray"}
+            size="lg"
+          />
+        </Link>
+        <Link to="/movies">
+          <IconButton
+            icon={<FaFilm />}
+            aria-label="Movies"
+            variant="ghost"
+            colorScheme={isActive("/movies") ? "red" : "gray"}
+            size="lg"
+          />
+        </Link>
+        <Link to="/shows">
+          <IconButton
+            icon={<FaTv />}
+            aria-label="TV Shows"
+            variant="ghost"
+            colorScheme={isActive("/shows") ? "red" : "gray"}
+            size="lg"
+          />
+        </Link>
+        <Link to="/history">
+          <IconButton
+            icon={<FaSearch />}
+            aria-label="Search"
+            variant="ghost"
+            colorScheme={isActive("/history") ? "red" : "gray"}
+            size="lg"
+          />
+        </Link>
         <IconButton
-          aria-label={isOpen ? "Close Menu" : "Open Menu"}
-          icon={isOpen ? <FaTimes /> : <FaBars />}
+          icon={<FaBars />}
+          aria-label="Menu"
           onClick={toggleSidebar}
-          colorScheme="red"
           variant="ghost"
-          size="md"
+          colorScheme="gray"
+          size="lg"
         />
-        <Text fontSize="xl" fontWeight="bold" color="red.500" ml={4}>
-          FilmVault
-        </Text>
       </Box>
 
       {/* Mobile Overlay */}
       <MobileOverlay />
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar / Mobile Drawer */}
       <Box
-        position={{ base: "fixed", md: "sticky" }}
+        position="fixed"
         top="0"
         left="0"
         h="100vh"
-        w={{ base: "240px", md: "100%" }}
-        bg="gray.800"
+        w={{ base: "280px", md: "240px" }}
+        bg="gray.900"
         transform={{
           base: isOpen ? "translateX(0)" : "translateX(-100%)",
           md: "translateX(0)",
         }}
         transition="transform 0.3s ease-in-out"
-        zIndex={50}
-        boxShadow={{ base: isOpen ? "2xl" : "none", md: "none" }}
+        zIndex={60}
+        boxShadow="2xl"
         overflowY="auto"
         className="scrollbar-hide"
       >
-        {/* Logo - only show on desktop or when mobile menu is open */}
+        {/* Logo */}
         <Flex
-          justify="center"
+          justify="space-between"
           align="center"
+          px={4}
           py={6}
-          display={{ base: "none", md: "flex" }}
+          borderBottom="1px"
+          borderColor="gray.800"
         >
           <Text fontSize="2xl" fontWeight="bold" color="red.500">
             FilmVault
           </Text>
+          <IconButton
+            icon={<FaTimes />}
+            aria-label="Close menu"
+            onClick={toggleSidebar}
+            variant="ghost"
+            colorScheme="gray"
+            display={{ base: "flex", md: "none" }}
+          />
         </Flex>
 
         {/* Navigation Links */}
@@ -177,30 +223,32 @@ const Navbar = () => {
             Search
           </NavLink>
 
-          <Box mt={4} mb={4}>
-            <Link to="/create-watchlist">
-              <Button
-                leftIcon={<FaPlus />}
-                colorScheme="red"
-                variant="solid"
-                size="sm"
-                width="100%"
-              >
-                Create Watchlist
-              </Button>
-            </Link>
-          </Box>
+          {isAuthenticated && (
+            <Box mt={4} mb={4}>
+              <Link to="/create-watchlist">
+                <Button
+                  leftIcon={<FaPlus />}
+                  colorScheme="red"
+                  variant="solid"
+                  size="sm"
+                  width="100%"
+                >
+                  Create Watchlist
+                </Button>
+              </Link>
+            </Box>
+          )}
         </Box>
 
-        <Divider />
+        {isAuthenticated && (
+          <>
+            <Divider />
 
-        {/* My Lists Section */}
-        <Box px={4} py={4}>
-          <Text fontWeight="bold" mb={2} color="gray.300">
-            MY LISTS
-          </Text>
-          {isAuthenticated ? (
-            <>
+            {/* My Lists Section */}
+            <Box px={4} py={4}>
+              <Text fontWeight="bold" mb={2} color="gray.300">
+                MY LISTS
+              </Text>
               {watchlist && watchlist.length > 0 ? (
                 <Box>
                   {watchlist.map((list) => (
@@ -228,15 +276,9 @@ const Navbar = () => {
                   No watchlists yet
                 </Text>
               )}
-            </>
-          ) : (
-            <Box>
-              <Text fontSize="sm" color="gray.400" fontStyle="italic" mb={2}>
-                Login to see your watchlists
-              </Text>
             </Box>
-          )}
-        </Box>
+          </>
+        )}
 
         {/* Footer with Login/Logout Button */}
         <Box px={4} mt="auto" pb={6} position="sticky" bottom="0">
@@ -269,7 +311,7 @@ const Navbar = () => {
             </Box>
           )}
 
-          {isAuthenticated ? (
+          {isAuthenticated && (
             <Button
               colorScheme="red"
               variant="outline"
@@ -277,15 +319,6 @@ const Navbar = () => {
               onClick={() => setLogoutModalOpen(true)}
             >
               Logout
-            </Button>
-          ) : (
-            <Button
-              colorScheme="red"
-              variant="outline"
-              width="100%"
-              onClick={handleLoginClick}
-            >
-              Login / Sign Up
             </Button>
           )}
 
@@ -297,8 +330,7 @@ const Navbar = () => {
         </Box>
       </Box>
 
-      {/* Content Spacer for Mobile */}
-      <Box height="60px" display={{ base: "block", md: "none" }} />
+
     </>
   );
 };

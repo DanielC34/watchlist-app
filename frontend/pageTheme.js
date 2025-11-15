@@ -9,9 +9,31 @@ const pageTheme = extendTheme({
   styles: {
     global: (props) => ({
       body: {
-        bg: mode("white", "blackAlpha.900")(props),
+        bg: mode("white", "#0a0a0a")(props),
+        color: mode("gray.800", "gray.100")(props),
       },
     }),
+  },
+  colors: {
+    brand: {
+      50: '#ffe5e5',
+      100: '#ffb3b3',
+      200: '#ff8080',
+      300: '#ff4d4d',
+      400: '#ff1a1a',
+      500: '#e60000',
+      600: '#b30000',
+      700: '#800000',
+      800: '#4d0000',
+      900: '#1a0000',
+    },
+  },
+  components: {
+    Button: {
+      defaultProps: {
+        colorScheme: 'brand',
+      },
+    },
   },
 });
 
