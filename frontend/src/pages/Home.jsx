@@ -1,11 +1,10 @@
 import {
-  Container,
+  Box,
   Flex,
-  FormLabel,
-  FormControl,
   Select,
   Button,
   Heading,
+  Text,
   useToast,
 } from "@chakra-ui/react";
 import { useState, useEffect, useCallback } from "react";
@@ -130,93 +129,84 @@ const Home = () => {
 
   return (
     <>
-      <Container maxW="container.xl" px={{ base: 2, md: 4 }}>
-        <Heading size={{ base: "lg", md: "xl" }}>Home</Heading>
-        <Flex
-          alignItems="center"
-          justifyContent="center"
-          my={{ base: 5, md: 10 }}
-        >
-          <FormControl>
-            <FormLabel fontSize={{ base: "sm", md: "md" }}>
-              Find out what is trending
-            </FormLabel>
-            <Select
-              w={{ base: "100%", md: "200px" }}
-              value={timeframe}
-              onChange={handleTimeframeChange}
-              size={{ base: "sm", md: "md" }}
-            >
-              <option value="day">Today</option>
-              <option value="week">This Week</option>
-            </Select>
-          </FormControl>
+      <Box mb={6}>
+        <Flex justify="space-between" align="center" mb={4}>
+          <Heading size="lg" fontWeight="bold" color="gray.100">
+            Trending
+          </Heading>
+          <Select
+            value={timeframe}
+            onChange={handleTimeframeChange}
+            size="sm"
+            w="auto"
+            bg="gray.900"
+            borderColor="gray.700"
+            _hover={{ borderColor: "gray.600" }}
+          >
+            <option value="day">Today</option>
+            <option value="week">This Week</option>
+          </Select>
         </Flex>
-      </Container>
+      </Box>
 
       {/* Display fetched trending data as cards */}
       {loading ? (
         <Loading />
       ) : trending.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
           {trending.map((item) => (
             <Link
               to={`/${item.media_type}/${item.id}`}
               key={item.id}
-              className="flex justify-center"
+              className="group"
             >
-              <div
-                className="movie-card border rounded-lg shadow-lg p-2"
-                style={{ maxWidth: "100%" }}
-              >
+              <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl">
                 {item.poster_path ? (
                   <img
                     src={getImageUrl(item.poster_path)}
                     alt={item.title || item.name}
-                    className="w-full h-auto rounded-md"
+                    className="w-full h-full object-cover"
                     loading="lazy"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-gray-700 flex items-center justify-center rounded-md">
-                    <p className="text-center">No Image</p>
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <p className="text-xs text-gray-500 text-center px-2">No Image</p>
                   </div>
                 )}
-                <h3 className="text-sm sm:text-lg font-semibold mt-2 truncate">
-                  {item.title || item.name}
-                </h3>
-                <p className="text-xs sm:text-sm">
-                  {item.release_date || item.first_air_date || "Unknown date"}
-                </p>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
               </div>
+              <h3 className="text-xs font-medium mt-2 line-clamp-2 text-gray-300">
+                {item.title || item.name}
+              </h3>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="text-center p-8">
-          <p>No movies or shows found. Please try a different selection.</p>
-        </div>
+        <Box textAlign="center" py={12}>
+          <Text color="gray.500">No content found</Text>
+        </Box>
       )}
 
       {/* Pagination controls */}
-      <Flex justifyContent="center" my="4" flexWrap="wrap" gap="2">
+      <Flex justifyContent="center" align="center" mt={8} gap={4}>
         <Button
           onClick={prevPage}
-          disabled={currentPage === 1}
-          mr={{ base: 1, md: 2 }}
-          size={{ base: "sm", md: "md" }}
+          isDisabled={currentPage === 1}
+          size="sm"
+          variant="outline"
+          colorScheme="gray"
         >
           Previous
         </Button>
-        <p className="flex items-center text-sm sm:text-md">
-          Page {currentPage} of {totalPages}
-        </p>
+        <Text fontSize="sm" color="gray.400">
+          {currentPage} / {totalPages}
+        </Text>
         <Button
           onClick={nextPage}
-          disabled={
-            trending.length < ITEMS_PER_PAGE || currentPage === totalPages
-          }
-          ml={{ base: 1, md: 2 }}
-          size={{ base: "sm", md: "md" }}
+          isDisabled={trending.length < ITEMS_PER_PAGE || currentPage === totalPages}
+          size="sm"
+          variant="outline"
+          colorScheme="gray"
         >
           Next
         </Button>

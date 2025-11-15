@@ -62,64 +62,68 @@ const Shows = () => {
 
   return (
     <>
-      <h2 className="font-bold text-xl mb-2">Trending TV Shows</h2>
-      <Container maxW={"container.xl"} px={{ base: 2, md: 4 }}>
-        <Flex alignItems={"baseline"} gap={"4"} my={{ base: 5, md: 10 }}>
-          <FormControl>
-            <FormLabel fontSize={{ base: "sm", md: "md" }}>
-              Discover new Shows
-            </FormLabel>
-            <Select
-              w={{ base: "100%", md: "200px" }}
-              value={category}
-              onChange={handleCategoryChange}
-              size={{ base: "sm", md: "md" }}
-            >
-              <option value="popular">Popular</option>
-              <option value="top_rated">Top Rated</option>
-              <option value="airing_today">Airing Today</option>
-              <option value="on_the_air">On The Air</option>
-            </Select>
-          </FormControl>
+      <Flex justify="space-between" align="center" mb={6} flexWrap="wrap" gap={4}>
+        <h2 className="text-2xl font-bold text-gray-100">TV Shows</h2>
+        <Flex align="center" gap={3}>
+          <span className="text-sm text-gray-400 hidden md:inline">Category:</span>
+          <Select
+            value={category}
+            onChange={handleCategoryChange}
+            size="md"
+            w={{ base: "auto", md: "200px" }}
+            bg="gray.900"
+            borderColor="gray.700"
+            _hover={{ borderColor: "gray.600" }}
+          >
+            <option value="popular">Popular</option>
+            <option value="top_rated">Top Rated</option>
+            <option value="airing_today">Airing Today</option>
+            <option value="on_the_air">On The Air</option>
+          </Select>
         </Flex>
-      </Container>
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+      </Flex>
+
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
         {shows.map((show) => (
           <div
             key={show.id}
-            className="show-card border rounded-lg shadow-lg p-2 cursor-pointer"
+            className="group cursor-pointer"
             onClick={() => handleCardClick(show.id)}
           >
-            <img
-              src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
-              alt={show.name}
-              className="w-full h-auto rounded-md"
-            />
-            <h3 className="text-sm sm:text-lg font-semibold mt-2 truncate">
+            <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl">
+              <img
+                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                alt={show.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+            </div>
+            <h3 className="text-xs font-medium mt-2 line-clamp-2 text-gray-300">
               {show.name}
             </h3>
-            <p className="text-xs sm:text-sm">{show.first_air_date}</p>
           </div>
         ))}
       </div>
 
-      <Flex justifyContent="center" my="4" flexWrap="wrap" gap="2">
+      <Flex justifyContent="center" align="center" mt={8} gap={4}>
         <Button
           onClick={prevPage}
-          disabled={currentPage === 1}
-          mr={{ base: 1, md: 2 }}
-          size={{ base: "sm", md: "md" }}
+          isDisabled={currentPage === 1}
+          size="sm"
+          variant="outline"
+          colorScheme="gray"
         >
           Previous
         </Button>
-        <p className="flex items-center text-sm sm:text-md">
-          Page {currentPage} of {totalPages}
+        <p className="text-sm text-gray-400">
+          {currentPage} / {totalPages}
         </p>
         <Button
           onClick={nextPage}
-          disabled={currentPage === totalPages}
-          ml={{ base: 1, md: 2 }}
-          size={{ base: "sm", md: "md" }}
+          isDisabled={currentPage === totalPages}
+          size="sm"
+          variant="outline"
+          colorScheme="gray"
         >
           Next
         </Button>

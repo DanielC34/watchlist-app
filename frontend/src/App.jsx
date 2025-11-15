@@ -12,21 +12,19 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen bg-gray-900 text-white">
-      {/* Sidebar - fixed width on desktop, collapsible on mobile */}
-      <div className="md:w-64 md:flex-shrink-0">
-        <Navbar />
-      </div>
-
+    <div className="flex min-h-screen bg-gray-950">
+      {/* Sidebar Navigation */}
+      <Navbar />
+      
       {/* Main content area */}
-      <div className="flex-1 overflow-auto">
+      <main className="flex-1 pb-20 md:pb-0 md:ml-60">
         <Header />
-
-        {/* Content Area */}
-        <div className="p-4 bg-gray-900 text-white">
+        
+        {/* Content Area with max width for better readability */}
+        <div className="px-4 py-6 max-w-7xl mx-auto">
           <Outlet />
         </div>
-      </div>
+      </main>
     </div>
   );
 }
