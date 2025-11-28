@@ -42,7 +42,9 @@ const updateUserProfilePicture = async (req, res) => {
         return res.status(200).json(user);
     }
     catch (err) {
-        return res.status(500).json({ error: "Server error", message: err.message });
+        return res
+            .status(500)
+            .json({ error: "Server error", message: err.message });
     }
 };
 exports.updateUserProfilePicture = updateUserProfilePicture;
