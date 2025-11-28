@@ -1,5 +1,6 @@
-#Ignore the .env file 
+#Ignore environment files 
 .env
+.env.example
 
 # Other files and directories to ignore
 node_modules/
