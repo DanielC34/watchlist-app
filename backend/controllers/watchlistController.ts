@@ -1,24 +1,29 @@
-const Watchlist = require("../models/Watchlist");
+import { Response } from "express";
+import Watchlist from "../models/Watchlist";
+import { AuthRequest, IWatchlistItem } from "../types";
 
-// Create a new watchlist
-exports.createWatchlist = async (req, res) => {
+export const createWatchlist = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
-    const { name, description } = req.body;
+    const {
+      name,
+      description,
+    }: { name?: string; description?: string } = req.body;
 
-    // Basic validation
     if (!name) {
       return res.status(400).json({ message: "Watchlist name is required" });
     }
 
-    // Create new watchlist
     const newWatchlist = new Watchlist({
       name,
       description,
-      userId: req.user.id, // Assuming req.user is set by auth middleware
+      userId: req.user.id,
       items: [],
     });
 
-    // Save to database
     const savedWatchlist = await newWatchlist.save();
 
     res.status(201).json(savedWatchlist);
@@ -28,8 +33,11 @@ exports.createWatchlist = async (req, res) => {
   }
 };
 
-// Get all watchlists for a user
-exports.getAllWatchlists = async (req, res) => {
+export const getAllWatchlists = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
     const watchlists = await Watchlist.find({ userId: req.user.id });
     res.json(watchlists);
@@ -39,8 +47,11 @@ exports.getAllWatchlists = async (req, res) => {
   }
 };
 
-// Get a single watchlist by ID
-exports.getWatchlistById = async (req, res) => {
+export const getWatchlistById = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
     const watchlist = await Watchlist.findOne({
       _id: req.params.id,
@@ -58,17 +69,21 @@ exports.getWatchlistById = async (req, res) => {
   }
 };
 
-// Update a watchlist
-exports.updateWatchlist = async (req, res) => {
-  try {
-    const { name, description } = req.body;
+export const updateWatchlist = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
 
-    // Basic validation
+  try {
+    const {
+      name,
+      description,
+    }: { name?: string; description?: string } = req.body;
+
     if (!name) {
       return res.status(400).json({ message: "Watchlist name is required" });
     }
 
-    // Find and update the watchlist
     const updatedWatchlist = await Watchlist.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id },
       {
@@ -90,8 +105,11 @@ exports.updateWatchlist = async (req, res) => {
   }
 };
 
-// Delete a watchlist
-exports.deleteWatchlist = async (req, res) => {
+export const deleteWatchlist = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
     const deletedWatchlist = await Watchlist.findOneAndDelete({
       _id: req.params.id,
@@ -109,19 +127,32 @@ exports.deleteWatchlist = async (req, res) => {
   }
 };
 
-// Add an item to a watchlist
-exports.addItemToWatchlist = async (req, res) => {
-  try {
-    const { movieId, title, posterPath, mediaType, releaseDate } = req.body;
+export const addItemToWatchlist = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
 
-    // Basic validation
+  try {
+    const {
+      movieId,
+      title,
+      posterPath,
+      mediaType,
+      releaseDate,
+    }: {
+      movieId?: string;
+      title?: string;
+      posterPath?: string;
+      mediaType?: "movie" | "tv";
+      releaseDate?: string;
+    } = req.body;
+
     if (!movieId || !title || !mediaType) {
       return res
         .status(400)
         .json({ message: "Movie ID, title, and media type are required" });
     }
 
-    // Find the watchlist
     const watchlist = await Watchlist.findOne({
       _id: req.params.id,
       userId: req.user.id,
@@ -131,7 +162,6 @@ exports.addItemToWatchlist = async (req, res) => {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    // Check if item already exists in watchlist
     const itemExists = watchlist.items.some(
       (item) => item.movieId === movieId && item.mediaType === mediaType
     );
@@ -142,18 +172,17 @@ exports.addItemToWatchlist = async (req, res) => {
         .json({ message: "Item already exists in watchlist" });
     }
 
-    // Add new item
-    const newItem = {
+    const newItem: IWatchlistItem = {
       movieId,
       title,
       posterPath,
       mediaType,
       releaseDate,
-      addedAt: Date.now(),
+      addedAt: new Date(),
     };
 
     watchlist.items.push(newItem);
-    watchlist.updatedAt = Date.now();
+    watchlist.updatedAt = new Date();
 
     await watchlist.save();
 
@@ -164,8 +193,14 @@ exports.addItemToWatchlist = async (req, res) => {
   }
 };
 
-// Remove an item from a watchlist
-exports.removeItemFromWatchlist = async (req, res) => {
+export const removeItemFromWatchlist = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
   try {
     const watchlist = await Watchlist.findOne({
       _id: req.params.id,
@@ -176,7 +211,6 @@ exports.removeItemFromWatchlist = async (req, res) => {
       return res.status(404).json({ message: "Watchlist not found" });
     }
 
-    // Find the item index
     const itemIndex = watchlist.items.findIndex(
       (item) => item._id.toString() === req.params.itemId
     );
@@ -185,9 +219,8 @@ exports.removeItemFromWatchlist = async (req, res) => {
       return res.status(404).json({ message: "Item not found in watchlist" });
     }
 
-    // Remove the item
     watchlist.items.splice(itemIndex, 1);
-    watchlist.updatedAt = Date.now();
+    watchlist.updatedAt = new Date();
 
     await watchlist.save();
 

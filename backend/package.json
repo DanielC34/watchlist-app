@@ -2,10 +2,10 @@
   "name": "@filmvault/backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon --watch . --ext ts --exec \"ts-node server.ts\"",
     "dev:ts": "ts-node server.ts",
     "build": "tsc",
     "type-check": "tsc --noEmit"

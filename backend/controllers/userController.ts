@@ -1,6 +1,11 @@
-const User = require("../models/User");
+import { Response } from "express";
+import User from "../models/User";
+import { AuthRequest } from "../types";
 
-exports.getUser = async (req, res) => {
+export const getUser = async (req: AuthRequest, res: Response) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
   try {
     const user = await User.findById(req.user.id).select("-password");
     res.json(user);
@@ -9,13 +14,17 @@ exports.getUser = async (req, res) => {
   }
 };
 
-exports.updateUserProfilePicture = async (req, res) => {
-  try {
-    //Extract userId from req.user and extract newProfilePicture from req.body
-    const userId = req.user.id;
-    const { newProfilePicture } = req.body
+export const updateUserProfilePicture = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  if (!req.user?.id) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
 
-    //Check if newProfilePicture is provided
+  try {
+    const { newProfilePicture }: { newProfilePicture?: string } = req.body;
+
     if (!newProfilePicture) {
       return res.status(400).json({
         error: "Bad Request",
@@ -24,28 +33,21 @@ exports.updateUserProfilePicture = async (req, res) => {
       });
     }
 
-      //Find user by userId
-      const user = await User.findById(userId);
+    const user = await User.findById(req.user.id);
 
-      //If user is not found, send a response with a 404 status code
     if (!user) {
       return res.status(404).json({
         error: "Not found",
-        message: `User with ID ${userId} not found`,
+        message: `User with ID ${req.user.id} not found`,
       });
     }
 
-        //If user is found, update profilePicture field
-        user.profilePicture = newProfilePicture;
+    user.profilePicture = newProfilePicture;
 
-        //Save te updated user info back in the database
-        await user.save();
+    await user.save();
 
-        //Send a success response with a 200 status code and the updated user data
-        res.status(200).json(user);
-      
+    res.status(200).json(user);
   } catch (err) {
-    //Catch any errors that occur during the process
-    res.status(500).json({ error: "Server error", message: err.message });
+    res.status(500).json({ error: "Server error", message: (err as Error).message });
   }
 };

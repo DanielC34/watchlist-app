@@ -1,16 +1,17 @@
-const express = require("express");
-const csrf = require('csurf');
-const { getUser, updateUserProfilePicture } = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware");
-const router = express.Router();
+import { Router } from "express";
+import csrf from "csurf";
+import {
+  getUser,
+  updateUserProfilePicture,
+} from "../controllers/userController";
+import { protect } from "../middleware/authMiddleware";
 
-// CSRF protection
+const router = Router();
+
 const csrfProtection = csrf({ cookie: true });
 
-// Protect route to ensure only logged-in users can access
 router.get("/me", protect, getUser);
 
-// Protect route for updating profile picture
 router.put("/profile/picture", protect, csrfProtection, updateUserProfilePicture);
 
-module.exports = router;
+export default router;

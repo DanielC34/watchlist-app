@@ -1,6 +1,6 @@
-const express = require("express");
-const router = express.Router();
-const {
+import { Router } from "express";
+import csrf from "csurf";
+import {
   createWatchlist,
   getAllWatchlists,
   getWatchlistById,
@@ -8,32 +8,23 @@ const {
   deleteWatchlist,
   addItemToWatchlist,
   removeItemFromWatchlist,
-} = require("../controllers/watchlistController");
-const { protect } = require('../middleware/authMiddleware');
-const csrf = require('csurf');
+} from "../controllers/watchlistController";
+import { protect } from "../middleware/authMiddleware";
 
-// CSRF protection
+const router = Router();
 const csrfProtection = csrf({ cookie: true });
 
-// Create a new watchlist
 router.post("/create", protect, csrfProtection, createWatchlist);
-
-// Get all watchlists for the current user
 router.get("/", protect, getAllWatchlists);
-
-// Get a single watchlist by ID
 router.get("/:id", protect, getWatchlistById);
-
-// Update a watchlist
 router.put("/:id", protect, csrfProtection, updateWatchlist);
-
-// Delete a watchlist
 router.delete("/:id", protect, csrfProtection, deleteWatchlist);
-
-// Add an item to a watchlist
 router.post("/:id/add-item", protect, csrfProtection, addItemToWatchlist);
+router.delete(
+  "/:id/items/:itemId",
+  protect,
+  csrfProtection,
+  removeItemFromWatchlist
+);
 
-// Remove an item from a watchlist
-router.delete("/:id/items/:itemId", protect, csrfProtection, removeItemFromWatchlist);
-
-module.exports = router;
+export default router;

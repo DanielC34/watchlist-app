@@ -1,55 +1,63 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+import { NextFunction, Response } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import User from "../models/User";
+import { AuthRequest } from "../types";
 
-const auth = async (req, res, next) => {
-  try {
-    // Check for the Authorization header
-    const authHeader = req.header("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No token, authorization denied" });
-    }
-    // Extract the token
-    const token = authHeader.replace("Bearer ", "");
+interface DecodedToken extends JwtPayload {
+  id: string;
+}
 
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+const jwtSecret = process.env.JWT_SECRET;
 
-    // Attach the user to the request object
-    req.user = await User.findById(decoded.id).select("-password"); // Exclude password
-    // Proceed to the next middleware or route handler
-    next();
-  } catch (error) {
-    return res.status(401).json({ error: "Token is not valid" });
- }
+if (!jwtSecret) {
+  throw new Error("JWT_SECRET is not defined");
+}
+
+const extractToken = (req: AuthRequest): string | null => {
+  const authHeader =
+    req.header("Authorization") ?? req.headers.authorization ?? null;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return null;
+  }
+  return authHeader.split(" ")[1];
 };
 
-const protect = async (req, res, next) => {
+const verifyToken = async (token: string) => {
+  const decoded = jwt.verify(token, jwtSecret) as DecodedToken;
+  return User.findById(decoded.id).select("-password");
+};
+
+const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const authHeader = req.headers.authorization;
-
-    // Check if the authorization header is present and starts with "Bearer"
-    if (authHeader && authHeader.startsWith("Bearer")) {
-      
-      // Extract token by splitting the header value
-      const token = authHeader.split(" ")[1];
-
-      // Verify the token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Find the user by ID from the decoded token
-      req.user = await User.findById(decoded.id).select("-password"); // Exclude password
-
-      // Proceed to the next middleware or route handler
-      next();
-    } else {
-      // If no token is found, send an unauthorized response
-      return res.status(401).json({ error: "Not authorized, no token" });
+    const token = extractToken(req);
+    if (!token) {
+      return res.status(401).json({ error: "No token, authorization denied" });
     }
-  } catch (err) {
-    // If token verification or any other error occurs, send an unauthorized response
+
+    req.user = await verifyToken(token);
+    next();
+  } catch {
     return res.status(401).json({ error: "Token is not valid" });
   }
 };
 
-module.exports = auth;
-module.exports.protect = protect;
+export const protect = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = extractToken(req);
+
+    if (!token) {
+      return res.status(401).json({ error: "Not authorized, no token" });
+    }
+
+    req.user = await verifyToken(token);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Token is not valid" });
+  }
+};
+
+export default auth;

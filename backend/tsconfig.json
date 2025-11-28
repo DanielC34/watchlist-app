@@ -15,8 +15,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "allowJs": false
   },
-  "include": ["**/*.ts", "**/*.js"],
+  "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

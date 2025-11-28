@@ -1,55 +1,59 @@
-const mongoose = require("mongoose");
+import mongoose, { Document, Model, Schema } from "mongoose";
+import { IWatchlist } from "../types";
 
-const watchlistSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  description: {
-    type: String,
-    trim: true,
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  items: [
-    {
-      movieId: {
-        type: String,
-        required: true,
-      },
-      title: {
-        type: String,
-        required: true,
-      },
-      posterPath: {
-        type: String,
-      },
-      mediaType: {
-        type: String,
-        enum: ["movie", "tv"],
-        required: true,
-      },
-      releaseDate: {
-        type: String,
-      },
-      addedAt: {
-        type: Date,
-        default: Date.now,
-      },
+export type WatchlistDocument = Document & IWatchlist;
+
+const WatchlistSchema = new Schema<WatchlistDocument>(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-  ],
-  createdAt: {
-    type: Date,
-    default: Date.now,
+    description: {
+      type: String,
+      trim: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    items: [
+      {
+        movieId: {
+          type: String,
+          required: true,
+        },
+        title: {
+          type: String,
+          required: true,
+        },
+        posterPath: {
+          type: String,
+        },
+        mediaType: {
+          type: String,
+          enum: ["movie", "tv"],
+          required: true,
+        },
+        releaseDate: {
+          type: String,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
-module.exports = mongoose.model("Watchlist", watchlistSchema);
+const Watchlist: Model<WatchlistDocument> =
+  (mongoose.models.Watchlist as Model<WatchlistDocument>) ||
+  mongoose.model<WatchlistDocument>("Watchlist", WatchlistSchema);
+
+export default Watchlist;
