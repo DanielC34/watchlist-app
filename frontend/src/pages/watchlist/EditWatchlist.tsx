@@ -106,6 +106,7 @@ const EditWatchlist = () => {
     );
   }
 
+  //edit watchlist
   return (
     <Container maxW="container.md" py={8}>
       <Button leftIcon={<FaArrowLeft />} onClick={() => navigate(-1)} mb={6}>
