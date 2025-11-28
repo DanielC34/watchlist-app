@@ -1,7 +1,9 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { IWatchlist } from "../types";
 
-export type WatchlistDocument = Document & IWatchlist;
+export type WatchlistDocument = Omit<Document & IWatchlist, "userId"> & {
+  userId: Types.ObjectId;
+};
 
 const WatchlistSchema = new Schema<WatchlistDocument>(
   {

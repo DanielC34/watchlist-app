@@ -1,59 +1,68 @@
-import React, { useState, useEffect } from "react";
-import {
-  Flex,
-  Button,
-  Select,
-} from "@chakra-ui/react";
+import { useState, useEffect, ChangeEvent } from "react";
+import { Flex, Button, Select } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_MOVIE_URL = "https://api.themoviedb.org/3";
 const ITEMS_PER_PAGE = 30; // Number of items per page
+type MovieCategory = "popular" | "top_rated" | "upcoming" | "now_playing";
+
+interface MovieSummary {
+  id: number;
+  title: string;
+  poster_path: string | null;
+}
 
 // Validate BASE_MOVIE_URL to prevent SSRF attacks
-const validateUrl = (url) => {
+const validateUrl = (url: string): boolean => {
   try {
     const urlObj = new URL(url);
-    return urlObj.hostname === 'api.themoviedb.org';
+    return urlObj.hostname === "api.themoviedb.org";
   } catch {
     return false;
   }
 };
 
 if (!validateUrl(BASE_MOVIE_URL)) {
-  throw new Error('Invalid TMDB API URL - potential SSRF attack');
+  throw new Error("Invalid TMDB API URL - potential SSRF attack");
 }
 
 const Movies = () => {
-  const [movies, setMovies] = useState([]);
-  const [category, setCategory] = useState("popular");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [movies, setMovies] = useState<MovieSummary[]>([]);
+  const [category, setCategory] = useState<MovieCategory>("popular");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const navigate = useNavigate();
 
-  const fetchMovies = async (category, page) => {
+  const fetchMovies = async (selectedCategory: MovieCategory, page: number) => {
     try {
       // Validate category to prevent SSRF
-      const allowedCategories = ['popular', 'top_rated', 'upcoming', 'now_playing'];
-      if (!allowedCategories.includes(category)) {
-        throw new Error('Invalid category parameter');
+      const allowedCategories: MovieCategory[] = [
+        "popular",
+        "top_rated",
+        "upcoming",
+        "now_playing",
+      ];
+      if (!allowedCategories.includes(selectedCategory)) {
+        throw new Error("Invalid category parameter");
       }
       
       // Validate page parameter to prevent SSRF
       if (!Number.isInteger(page) || page < 1 || page > 1000) {
-        throw new Error('Invalid page parameter');
+        throw new Error("Invalid page parameter");
       }
       
       const response = await axios.get(
-        `${BASE_MOVIE_URL}/movie/${category}?api_key=${API_KEY}&page=${page}`
+        `${BASE_MOVIE_URL}/movie/${selectedCategory}?api_key=${API_KEY}&page=${page}`
       );
-      setMovies(response.data.results);
-      const totalItems = response.data.total_results;
+      const results: MovieSummary[] = response.data.results;
+      setMovies(results);
+      const totalItems: number = response.data.total_results;
       const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
       setTotalPages(totalPagesCount);
     } catch (error) {
-      console.error('Error fetching movies:', error);
+      console.error("Error fetching movies:", error);
     }
   };
 
@@ -61,8 +70,8 @@ const Movies = () => {
     fetchMovies(category, currentPage);
   }, [category, currentPage]);
 
-  const handleCategoryChange = (e) => {
-    setCategory(e.target.value);
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value as MovieCategory);
     setCurrentPage(1);
   };
 
@@ -78,7 +87,7 @@ const Movies = () => {
     }
   };
 
-  const handleCardClick = (id) => {
+  const handleCardClick = (id: number) => {
     navigate(`/movie/${id}`);
   };
 
@@ -114,7 +123,7 @@ const Movies = () => {
           >
             <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl">
               <img
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                src={`https://image.tmdb.org/t/p/w500${movie.poster_path ?? ""}`}
                 alt={movie.title}
                 className="w-full h-full object-cover"
               />

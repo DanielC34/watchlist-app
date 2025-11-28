@@ -1,24 +1,28 @@
+/// <reference path="../types/express.d.ts" />
 import { Response } from "express";
 import User from "../models/User";
 import { AuthRequest } from "../types";
 
-export const getUser = async (req: AuthRequest, res: Response) => {
-  if (!req.user?.id) {
+export const getUser = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  if (!req.user?._id) {
     return res.status(401).json({ error: "Not authenticated" });
   }
   try {
-    const user = await User.findById(req.user.id).select("-password");
-    res.json(user);
+    const user = await User.findById(req.user._id).select("-password");
+    return res.json(user);
   } catch (err) {
-    res.status(500).json({ error: "Server error" });
+    return res.status(500).json({ error: "Server error" });
   }
 };
 
 export const updateUserProfilePicture = async (
   req: AuthRequest,
   res: Response
-) => {
-  if (!req.user?.id) {
+): Promise<Response> => {
+  if (!req.user?._id) {
     return res.status(401).json({ error: "Not authenticated" });
   }
 
@@ -33,12 +37,12 @@ export const updateUserProfilePicture = async (
       });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({
         error: "Not found",
-        message: `User with ID ${req.user.id} not found`,
+        message: `User with ID ${req.user._id} not found`,
       });
     }
 
@@ -46,8 +50,10 @@ export const updateUserProfilePicture = async (
 
     await user.save();
 
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (err) {
-    res.status(500).json({ error: "Server error", message: (err as Error).message });
+    return res
+      .status(500)
+      .json({ error: "Server error", message: (err as Error).message });
   }
 };

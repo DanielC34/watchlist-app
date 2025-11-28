@@ -1,12 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Flex,
-  FormControl,
-  FormLabel,
-  Button,
-  Select,
-} from "@chakra-ui/react";
+import { useState, useEffect, ChangeEvent } from "react";
+import { Flex, Button, Select } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -14,24 +7,33 @@ const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_SHOW_URL = "https://api.themoviedb.org/3";
 const ITEMS_PER_PAGE = 30; // Number of items per page
 
+type ShowCategory = "popular" | "top_rated" | "airing_today" | "on_the_air";
+
+interface TvShow {
+  id: number;
+  name: string;
+  poster_path: string | null;
+}
+
 const Shows = () => {
-  const [shows, setShows] = useState([]);
-  const [category, setCategory] = useState("popular");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [shows, setShows] = useState<TvShow[]>([]);
+  const [category, setCategory] = useState<ShowCategory>("popular");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const navigate = useNavigate();
 
-  const fetchShows = async (category, page) => {
+  const fetchShows = async (selectedCategory: ShowCategory, page: number) => {
     try {
       const response = await axios.get(
-        `${BASE_SHOW_URL}/tv/${category}?api_key=${API_KEY}&page=${page}`
+        `${BASE_SHOW_URL}/tv/${selectedCategory}?api_key=${API_KEY}&page=${page}`
       );
-      setShows(response.data.results);
-      const totalItems = response.data.total_results;
+      const results: TvShow[] = response.data.results;
+      setShows(results);
+      const totalItems: number = response.data.total_results;
       const totalPagesCount = Math.ceil(totalItems / ITEMS_PER_PAGE);
       setTotalPages(totalPagesCount);
     } catch (error) {
-      console.error(`Error fetching ${category} tv shows:`, error);
+      console.error(`Error fetching ${selectedCategory} tv shows:`, error);
     }
   };
 
@@ -39,8 +41,8 @@ const Shows = () => {
     fetchShows(category, currentPage);
   }, [category, currentPage]);
 
-  const handleCategoryChange = (e) => {
-    setCategory(e.target.value);
+  const handleCategoryChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setCategory(e.target.value as ShowCategory);
     setCurrentPage(1);
   };
 
@@ -56,7 +58,7 @@ const Shows = () => {
     }
   };
 
-  const handleCardClick = (id) => {
+  const handleCardClick = (id: number) => {
     navigate(`/tv/${id}`);
   };
 
@@ -92,7 +94,7 @@ const Shows = () => {
           >
             <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl">
               <img
-                src={`https://image.tmdb.org/t/p/w500${show.poster_path}`}
+                src={`https://image.tmdb.org/t/p/w500${show.poster_path ?? ""}`}
                 alt={show.name}
                 className="w-full h-full object-cover"
               />

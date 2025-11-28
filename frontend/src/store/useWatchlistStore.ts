@@ -18,10 +18,22 @@ interface WatchlistState {
   error: string | null;
   getWatchlist: () => Promise<void>;
   fetchWatchlistById: (watchlistId: string) => Promise<void>;
-  createWatchlist: (watchlistName: string, description?: string) => Promise<Watchlist | undefined>;
-  addItemToWatchlist: (watchlistId: string, item: Omit<WatchlistItem, '_id' | 'addedAt'>) => Promise<void>;
-  updateWatchlist: (watchlistId: string, newWatchlistName: string) => Promise<void>;
-  removeItemFromWatchlist: (watchlistId: string, itemId: string) => Promise<boolean>;
+  createWatchlist: (
+    watchlistName: string,
+    description?: string
+  ) => Promise<Watchlist | undefined>;
+  addItemToWatchlist: (
+    watchlistId: string,
+    item: Omit<WatchlistItem, "_id" | "addedAt">
+  ) => Promise<void>;
+  updateWatchlist: (
+    watchlistId: string,
+    newWatchlistName: string
+  ) => Promise<void>;
+  removeItemFromWatchlist: (
+    watchlistId: string,
+    itemId: string
+  ) => Promise<boolean>;
   deleteWatchlist: (watchlistId: string) => Promise<boolean>;
   ensureWatchedWatchlist: () => Promise<Watchlist | undefined>;
 }
@@ -64,10 +76,14 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       return newWatchlist;
     } catch (error: any) {
       set({ error: error.message, loading: false });
+      throw error;
     }
   },
 
-  addItemToWatchlist: async (watchlistId: string, item: Omit<WatchlistItem, '_id' | 'addedAt'>) => {
+  addItemToWatchlist: async (
+    watchlistId: string,
+    item: Omit<WatchlistItem, "_id" | "addedAt">
+  ) => {
     try {
       set({ loading: true });
       const updatedWatchlist = await addItemToWatchlist(watchlistId, item);
@@ -82,12 +98,17 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
     }
   },
 
-  updateWatchlist: async (watchlistId: string, newWatchlistName: string) => {
+  updateWatchlist: async (
+    watchlistId: string,
+    newWatchlistName: string,
+    description?: string
+  ) => {
     try {
       set({ loading: true });
       const updatedWatchlist = await updateWatchlistAPI(
         watchlistId,
-        newWatchlistName
+        newWatchlistName,
+        description
       );
 
       set((state) => ({

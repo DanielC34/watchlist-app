@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import jwt from "jsonwebtoken";
 import winston from "winston";
 import { Response } from "express";
@@ -20,13 +21,11 @@ const logger = winston.createLogger({
   ],
 });
 
-const jwtSecret = process.env.JWT_SECRET;
-
-if (!jwtSecret) {
-  throw new Error("JWT_SECRET is not defined in environment variables");
-}
-
-export const register = async (req: AuthRequest, res: Response) => {
+export const register = async (req: AuthRequest, res: Response): Promise<Response> => {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    return res.status(500).json({ error: "Server configuration error" });
+  }
   const {
     username,
     email,
@@ -45,11 +44,11 @@ export const register = async (req: AuthRequest, res: Response) => {
 
     logger.info(`User created successfully: ${user._id.toString()}`);
 
-    const token = jwt.sign({ id: user._id.toString() }, jwtSecret, {
+    const token = jwt.sign({ id: user._id.toString() }, jwtSecret!, {
       expiresIn: "1h",
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Registration successful",
       token,
       user: {
@@ -59,13 +58,18 @@ export const register = async (req: AuthRequest, res: Response) => {
     });
   } catch (err) {
     logger.error(`Registration error: ${(err as Error).message}`);
-    res.status(400).json({
+    return res.status(400).json({
       error: "An error occurred during registration. Please try again.",
     });
   }
 };
 
 export const login = async (req: AuthRequest, res: Response) => {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    return res.status(500).json({ error: "Server configuration error" });
+  }
+  
   const { email, password }: { email?: string; password?: string } = req.body;
 
   if (!email || !password) {
@@ -98,7 +102,7 @@ export const login = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const token = jwt.sign({ id: user._id.toString() }, jwtSecret, {
+    const token = jwt.sign({ id: user._id.toString() }, jwtSecret!, {
       expiresIn: "1h",
     });
 
@@ -134,7 +138,7 @@ export const logout = (req: AuthRequest, res: Response) => {
   });
 
   logger.info(
-    `User ${req.user ? req.user.id : "unknown"} logged out at ${new Date().toISOString()}`
+    `User ${req.user ? req.user._id : "unknown"} logged out at ${new Date().toISOString()}`
   );
 
   res.status(200).json({ message: "Logged out successfully" });

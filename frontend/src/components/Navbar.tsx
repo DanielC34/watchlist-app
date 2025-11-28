@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Divider, IconButton, Box, Text, Flex, Avatar } from "@chakra-ui/react";
+import { useState, useEffect, ReactNode } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Divider, IconButton, Box, Text, Flex, Avatar, Button } from "@chakra-ui/react";
 import {
   FaHome,
-  FaHistory,
   FaFilm,
   FaTv,
   FaPlus,
@@ -11,15 +10,20 @@ import {
   FaBars,
   FaSearch,
 } from "react-icons/fa";
-import { Button } from "@chakra-ui/react";
 import useAuthStore from "../store/useAuthStore";
-import { useNavigate } from "react-router-dom";
 import { useWatchlistStore } from "../store/useWatchlistStore";
 import LogoutModal from "./LogoutModal";
+import { Watchlist } from "../types";
+
+type NavLinkProps = {
+  to: string;
+  icon: ReactNode;
+  children: ReactNode;
+};
 
 const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState<boolean>(false);
   const { watchlist, getWatchlist } = useWatchlistStore();
   const location = useLocation();
   const navigate = useNavigate();
@@ -46,11 +50,6 @@ const Navbar = () => {
     }
   };
 
-  // Function to handle login button click
-  const handleLoginClick = () => {
-    navigate("/profile");
-  };
-
   const handleLogout = () => {
     logout();
     setLogoutModalOpen(false);
@@ -59,12 +58,12 @@ const Navbar = () => {
   };
 
   // Check if the current path matches the link path
-  const isActive = (path) => {
+  const isActive = (path: string): boolean => {
     return location.pathname === path;
   };
 
   // NavLink component for consistent styling
-  const NavLink = ({ to, icon, children }) => {
+  const NavLink = ({ to, icon, children }: NavLinkProps) => {
     const active = isActive(to);
     return (
       <Link to={to} className="w-full">
@@ -251,7 +250,7 @@ const Navbar = () => {
               </Text>
               {watchlist && watchlist.length > 0 ? (
                 <Box>
-                  {watchlist.map((list) => (
+                  {watchlist.map((list: Watchlist) => (
                     <Link key={list._id} to={`/watchlist/${list._id}`}>
                       <Flex
                         py={2}
@@ -298,13 +297,13 @@ const Navbar = () => {
               _hover={{ bg: "gray.600", transition: "all 0.2s" }}
             >
               <Flex align="center">
-                <Avatar size="sm" name={user.username} mr={3} />
+                <Avatar size="sm" name={user?.username} mr={3} />
                 <Box>
                   <Text fontSize="sm" fontWeight="medium" color="white">
-                    {user.username}
+                    {user?.username}
                   </Text>
                   <Text fontSize="xs" color="gray.400">
-                    {user.email}
+                    {user?.email}
                   </Text>
                 </Box>
               </Flex>

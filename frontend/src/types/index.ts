@@ -15,7 +15,7 @@ export interface Movie {
   release_date?: string;
   first_air_date?: string;
   vote_average: number;
-  media_type?: 'movie' | 'tv';
+  media_type?: "movie" | "tv";
   genre_ids?: number[];
 }
 
@@ -23,8 +23,9 @@ export interface WatchlistItem {
   _id: string;
   movieId: string;
   title: string;
-  poster_path: string;
-  media_type: 'movie' | 'tv';
+  posterPath: string;
+  media_type: "movie" | "tv";
+  releaseDate?: string;
   addedAt: string;
 }
 
@@ -56,6 +57,12 @@ export interface WatchlistState {
   getWatchlist: () => Promise<void>;
   createWatchlist: (name: string, description?: string) => Promise<Watchlist>;
   deleteWatchlist: (id: string) => Promise<void>;
-  addItemToWatchlist: (watchlistId: string, item: Omit<WatchlistItem, '_id' | 'addedAt'>) => Promise<void>;
-  removeItemFromWatchlist: (watchlistId: string, itemId: string) => Promise<void>;
+  addItemToWatchlist: (
+    watchlistId: string,
+    item: Omit<WatchlistItem, "_id" | "addedAt">
+  ) => Promise<void>;
+  removeItemFromWatchlist: (
+    watchlistId: string,
+    itemId: string
+  ) => Promise<void>;
 }

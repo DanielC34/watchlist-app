@@ -25,13 +25,13 @@ export interface IWatchlist {
   name: string;
   description?: string;
   items: IWatchlistItem[];
-  userId: string;
+  userId: string | any; // Can be ObjectId from MongoDB
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface AuthRequest extends Request {
-  user?: (IUser & { id: string }) | null;
+  user?: Express.User;
   session: Request["session"] & {
     userId?: string;
   };

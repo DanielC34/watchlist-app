@@ -1,3 +1,4 @@
+/// <reference path="../types/express.d.ts" />
 import { NextFunction, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/User";
@@ -5,12 +6,6 @@ import { AuthRequest } from "../types";
 
 interface DecodedToken extends JwtPayload {
   id: string;
-}
-
-const jwtSecret = process.env.JWT_SECRET;
-
-if (!jwtSecret) {
-  throw new Error("JWT_SECRET is not defined");
 }
 
 const extractToken = (req: AuthRequest): string | null => {
@@ -23,6 +18,10 @@ const extractToken = (req: AuthRequest): string | null => {
 };
 
 const verifyToken = async (token: string) => {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET is not defined");
+  }
   const decoded = jwt.verify(token, jwtSecret) as DecodedToken;
   return User.findById(decoded.id).select("-password");
 };
@@ -34,8 +33,12 @@ const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
       return res.status(401).json({ error: "No token, authorization denied" });
     }
 
-    req.user = await verifyToken(token);
-    next();
+    const user = await verifyToken(token);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    req.user = user;
+    return next();
   } catch {
     return res.status(401).json({ error: "Token is not valid" });
   }
@@ -53,8 +56,12 @@ export const protect = async (
       return res.status(401).json({ error: "Not authorized, no token" });
     }
 
-    req.user = await verifyToken(token);
-    next();
+    const user = await verifyToken(token);
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    req.user = user;
+    return next();
   } catch {
     return res.status(401).json({ error: "Token is not valid" });
   }

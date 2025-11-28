@@ -18,7 +18,10 @@ interface AuthState {
 }
 
 const useAuthStore = create<AuthState>((set) => ({
-  user: JSON.parse(localStorage.getItem("user") || "{}") || { username: "", email: "" },
+  user: JSON.parse(localStorage.getItem("user") || "{}") || {
+    username: "",
+    email: "",
+  },
   isAuthenticated: !!localStorage.getItem("token"),
   error: null,
 
@@ -27,21 +30,25 @@ const useAuthStore = create<AuthState>((set) => ({
   signup: async (username: string, email: string, password: string) => {
     try {
       const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
-        withCredentials: true
+        withCredentials: true,
       });
       const csrfToken = csrfResponse.data.csrfToken;
 
-      const response = await axios.post(`${ROOT_URL}/api/auth/register`, {
-        username,
-        email,
-        password,
-        _csrf: csrfToken,
-      }, {
-        withCredentials: true,
-        headers: {
-          'X-CSRF-Token': csrfToken
+      const response = await axios.post(
+        `${ROOT_URL}/api/auth/register`,
+        {
+          username,
+          email,
+          password,
+          _csrf: csrfToken,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
         }
-      });
+      );
 
       set({
         user: response.data.user,
@@ -50,10 +57,10 @@ const useAuthStore = create<AuthState>((set) => ({
       });
 
       const sanitizedUser = {
-        username: (response.data.user.username || '').replace(/[<>"'&]/g, ''),
-        email: (response.data.user.email || '').replace(/[<>"'&]/g, '')
+        username: (response.data.user.username || "").replace(/[<>"'&]/g, ""),
+        email: (response.data.user.email || "").replace(/[<>"'&]/g, ""),
       };
-      
+
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(sanitizedUser));
     } catch (err: any) {
@@ -69,20 +76,24 @@ const useAuthStore = create<AuthState>((set) => ({
   login: async (email: string, password: string) => {
     try {
       const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
-        withCredentials: true
+        withCredentials: true,
       });
       const csrfToken = csrfResponse.data.csrfToken;
 
-      const response = await axios.post(`${ROOT_URL}/api/auth/login`, {
-        email,
-        password,
-        _csrf: csrfToken,
-      }, {
-        withCredentials: true,
-        headers: {
-          'X-CSRF-Token': csrfToken
+      const response = await axios.post(
+        `${ROOT_URL}/api/auth/login`,
+        {
+          email,
+          password,
+          _csrf: csrfToken,
+        },
+        {
+          withCredentials: true,
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
         }
-      });
+      );
 
       if (response.data.user && response.data.token) {
         set({
@@ -92,10 +103,10 @@ const useAuthStore = create<AuthState>((set) => ({
         });
 
         const sanitizedUser = {
-          username: (response.data.user.username || '').replace(/[<>"'&]/g, ''),
-          email: (response.data.user.email || '').replace(/[<>"'&]/g, '')
+          username: (response.data.user.username || "").replace(/[<>"'&]/g, ""),
+          email: (response.data.user.email || "").replace(/[<>"'&]/g, ""),
         };
-        
+
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(sanitizedUser));
       } else {
@@ -139,7 +150,7 @@ const useAuthStore = create<AuthState>((set) => ({
 
   fetchUserProfile: async () => {
     try {
-      const response = await axios.get(`${ROOT_URL}/api/users/me`, {
+      const response = await axios.get(`${ROOT_URL}/api/user/me`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -156,34 +167,58 @@ const useAuthStore = create<AuthState>((set) => ({
   updateUserProfilePicture: async (file: File) => {
     try {
       const csrfResponse = await axios.get(`${ROOT_URL}/api/csrf-token`, {
-        withCredentials: true
+        withCredentials: true,
       });
       const csrfToken = csrfResponse.data.csrfToken;
 
-      const formData = new FormData();
-      formData.append("profilePicture", file);
-      formData.append("_csrf", csrfToken);
+      // Convert file to base64 string for JSON payload
+      const reader = new FileReader();
 
-      const response = await axios.post(
-        `${ROOT_URL}/api/users/update-profile-picture`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            'X-CSRF-Token': csrfToken
-          },
-        }
-      );
+      return new Promise((resolve, reject) => {
+        reader.onload = async () => {
+          try {
+            const base64String = reader.result as string;
 
-      set({ user: { ...response.data }, isAuthenticated: true, error: null });
-      localStorage.setItem("user", JSON.stringify(response.data));
-    } catch (err: any) {
-      set({
-        error:
-          err.response?.data?.message || "Failed to update profile picture",
+            const response = await axios.put(
+              `${ROOT_URL}/api/user/profile/picture`,
+              {
+                newProfilePicture: base64String,
+              },
+              {
+                withCredentials: true,
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  "X-CSRF-Token": csrfToken,
+                },
+              }
+            );
+
+            set({
+              user: { ...response.data },
+              isAuthenticated: true,
+              error: null,
+            });
+            localStorage.setItem("user", JSON.stringify(response.data));
+            resolve(undefined);
+          } catch (err: any) {
+            const errorMessage =
+              err.response?.data?.message || "Failed to update profile picture";
+            set({ error: errorMessage });
+            reject(err);
+          }
+        };
+
+        reader.onerror = () => {
+          reject(new Error("Failed to read file"));
+        };
+
+        reader.readAsDataURL(file);
       });
+    } catch (err: any) {
+      const errorMessage =
+        err.response?.data?.message || "Failed to update profile picture";
+      set({ error: errorMessage });
+      throw err;
     }
   },
 }));
