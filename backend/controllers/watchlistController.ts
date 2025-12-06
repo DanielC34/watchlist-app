@@ -244,3 +244,82 @@ export const removeItemFromWatchlist = async (
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+export const updateWatchlistItem = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  if (!req.user?._id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  try {
+    const { status, rating, personalNotes } = req.body;
+
+    const watchlist = await Watchlist.findOne({
+      _id: req.params.id,
+      userId: req.user._id,
+    });
+
+    if (!watchlist) {
+      return res.status(404).json({ message: "Watchlist not found" });
+    }
+
+    const item = watchlist.items.find(
+      (item) => item._id?.toString() === req.params.itemId
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Item not found in watchlist" });
+    }
+
+    if (status) item.status = status;
+    if (rating !== undefined) item.rating = rating;
+    if (personalNotes !== undefined) item.personalNotes = personalNotes;
+
+    watchlist.updatedAt = new Date();
+
+    await watchlist.save();
+
+    return res.json(watchlist);
+  } catch (error) {
+    console.error("Error updating watchlist item:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getRecentActivity = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  if (!req.user?._id) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  try {
+    const watchlists = await Watchlist.find({ userId: req.user._id }).lean();
+    let allItems: any[] = [];
+
+    watchlists.forEach((list) => {
+      const itemsWithListName = list.items.map((item: any) => ({
+        ...item,
+        watchlistName: list.name,
+        watchlistId: list._id,
+      }));
+      allItems = [...allItems, ...itemsWithListName];
+    });
+
+    // Sort by addedAt desc
+    allItems.sort((a, b) => {
+      return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+    });
+
+    // Limit to 10
+    const recentActivity = allItems.slice(0, 10);
+
+    return res.json(recentActivity);
+  } catch (error) {
+    console.error("Error fetching recent activity:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

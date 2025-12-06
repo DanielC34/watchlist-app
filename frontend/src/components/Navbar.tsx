@@ -1,6 +1,6 @@
 import { useState, useEffect, ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Divider, IconButton, Box, Text, Flex, Avatar, Button } from "@chakra-ui/react";
+import { Divider, IconButton, Box, Text, Flex, Avatar, Button, VStack, useColorModeValue } from "@chakra-ui/react";
 import {
   FaHome,
   FaFilm,
@@ -29,62 +29,59 @@ const Navbar = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuthStore();
 
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const mobileNavBg = useColorModeValue("white", "dark.bg");
+
   useEffect(() => {
     if (isAuthenticated) {
       getWatchlist();
     }
   }, [isAuthenticated, getWatchlist]);
 
-  // Close sidebar when route changes (especially on mobile)
+  // Close sidebar when route changes
   useEffect(() => {
     setIsOpen(false);
-    document.body.classList.remove("overflow-hidden");
+    document.body.style.overflow = "auto";
   }, [location]);
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
-      document.body.classList.add("overflow-hidden");
-    } else {
-      document.body.classList.remove("overflow-hidden");
-    }
+    const newState = !isOpen;
+    setIsOpen(newState);
+    document.body.style.overflow = newState ? "hidden" : "auto";
   };
 
   const handleLogout = () => {
     logout();
     setLogoutModalOpen(false);
-    // Optionally navigate to home or login page
     navigate("/");
   };
 
-  // Check if the current path matches the link path
   const isActive = (path: string): boolean => {
     return location.pathname === path;
   };
 
-  // NavLink component for consistent styling
   const NavLink = ({ to, icon, children }: NavLinkProps) => {
     const active = isActive(to);
     return (
-      <Link to={to} className="w-full">
+      <Link to={to} style={{ width: "100%" }}>
         <Flex
           align="center"
-          py={2}
-          px={3}
-          borderRadius="md"
-          bg={active ? "rgba(229, 62, 62, 0.2)" : "transparent"}
-          color={active ? "red.400" : "white"}
-          _hover={{ bg: "rgba(229, 62, 62, 0.1)", color: "red.300" }}
+          py={3}
+          px={4}
+          borderRadius="lg"
+          bg={active ? "brand.500" : "transparent"}
+          color={active ? "white" : "gray.400"}
+          _hover={{ bg: active ? "brand.600" : "whiteAlpha.100", color: active ? "white" : "white" }}
           transition="all 0.2s"
+          mb={1}
         >
-          <Box mr={3}>{icon}</Box>
-          <Text fontWeight={active ? "bold" : "normal"}>{children}</Text>
+          <Box mr={3} fontSize="lg">{icon}</Box>
+          <Text fontWeight={active ? "semibold" : "medium"}>{children}</Text>
         </Flex>
       </Link>
     );
   };
 
-  // Overlay for mobile
   const MobileOverlay = () => (
     <Box
       display={{ base: isOpen ? "block" : "none", md: "none" }}
@@ -93,38 +90,40 @@ const Navbar = () => {
       left={0}
       right={0}
       bottom={0}
-      bg="rgba(0, 0, 0, 0.7)"
+      bg="blackAlpha.700"
       zIndex={40}
       onClick={toggleSidebar}
+      backdropFilter="blur(2px)"
     />
   );
 
   return (
     <>
       {/* Mobile Bottom Navigation */}
-      <Box
+      <Flex
         position="fixed"
         bottom="0"
         left="0"
         right="0"
-        bg="gray.900"
+        bg={mobileNavBg}
         borderTop="1px"
-        borderColor="gray.800"
+        borderColor={borderColor}
         display={{ base: "flex", md: "none" }}
-        justifyContent="space-around"
-        alignItems="center"
+        justify="space-around"
+        align="center"
         px={2}
-        py={2}
+        py={3}
         zIndex={50}
-        boxShadow="0 -2px 10px rgba(0,0,0,0.3)"
+        boxShadow="0 -4px 20px rgba(0,0,0,0.2)"
       >
         <Link to="/">
           <IconButton
             icon={<FaHome />}
             aria-label="Home"
             variant="ghost"
-            colorScheme={isActive("/") || isActive("/home") ? "red" : "gray"}
+            colorScheme={isActive("/") || isActive("/home") ? "brand" : "gray"}
             size="lg"
+            isRound
           />
         </Link>
         <Link to="/movies">
@@ -132,8 +131,9 @@ const Navbar = () => {
             icon={<FaFilm />}
             aria-label="Movies"
             variant="ghost"
-            colorScheme={isActive("/movies") ? "red" : "gray"}
+            colorScheme={isActive("/movies") ? "brand" : "gray"}
             size="lg"
+            isRound
           />
         </Link>
         <Link to="/shows">
@@ -141,8 +141,9 @@ const Navbar = () => {
             icon={<FaTv />}
             aria-label="TV Shows"
             variant="ghost"
-            colorScheme={isActive("/shows") ? "red" : "gray"}
+            colorScheme={isActive("/shows") ? "brand" : "gray"}
             size="lg"
+            isRound
           />
         </Link>
         <Link to="/history">
@@ -150,8 +151,9 @@ const Navbar = () => {
             icon={<FaSearch />}
             aria-label="Search"
             variant="ghost"
-            colorScheme={isActive("/history") ? "red" : "gray"}
+            colorScheme={isActive("/history") ? "brand" : "gray"}
             size="lg"
+            isRound
           />
         </Link>
         <IconButton
@@ -161,10 +163,10 @@ const Navbar = () => {
           variant="ghost"
           colorScheme="gray"
           size="lg"
+          isRound
         />
-      </Box>
+      </Flex>
 
-      {/* Mobile Overlay */}
       <MobileOverlay />
 
       {/* Desktop Sidebar / Mobile Drawer */}
@@ -174,27 +176,30 @@ const Navbar = () => {
         left="0"
         h="100vh"
         w={{ base: "280px", md: "240px" }}
-        bg="gray.900"
+        bg="dark.card"
         transform={{
           base: isOpen ? "translateX(0)" : "translateX(-100%)",
           md: "translateX(0)",
         }}
-        transition="transform 0.3s ease-in-out"
+        transition="transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         zIndex={60}
-        boxShadow="2xl"
+        borderRight="1px"
+        borderColor="whiteAlpha.100"
         overflowY="auto"
-        className="scrollbar-hide"
+        css={{
+          "&::-webkit-scrollbar": { display: "none" },
+          msOverflowStyle: "none",
+          scrollbarWidth: "none",
+        }}
       >
         {/* Logo */}
         <Flex
           justify="space-between"
           align="center"
-          px={4}
-          py={6}
-          borderBottom="1px"
-          borderColor="gray.800"
+          px={6}
+          py={8}
         >
-          <Text fontSize="2xl" fontWeight="bold" color="red.500">
+          <Text fontSize="2xl" fontWeight="900" letterSpacing="tight" bgGradient="linear(to-r, brand.400, accent.500)" bgClip="text">
             FilmVault
           </Text>
           <IconButton
@@ -202,35 +207,35 @@ const Navbar = () => {
             aria-label="Close menu"
             onClick={toggleSidebar}
             variant="ghost"
-            colorScheme="gray"
+            colorScheme="whiteAlpha"
             display={{ base: "flex", md: "none" }}
+            size="sm"
           />
         </Flex>
 
         {/* Navigation Links */}
-        <Box px={4} mb={6} mt={{ base: 6, md: 0 }}>
-          <NavLink to="/" icon={<FaHome />}>
-            Home
-          </NavLink>
-          <NavLink to="/movies" icon={<FaFilm />}>
-            Movies
-          </NavLink>
-          <NavLink to="/shows" icon={<FaTv />}>
-            TV Shows
-          </NavLink>
-          <NavLink to="/history" icon={<FaSearch />}>
-            Search
-          </NavLink>
+        <Box px={4} mb={6}>
+          <VStack spacing={1} align="stretch">
+            <NavLink to="/" icon={<FaHome />}>Home</NavLink>
+            <NavLink to="/movies" icon={<FaFilm />}>Movies</NavLink>
+            <NavLink to="/shows" icon={<FaTv />}>TV Shows</NavLink>
+            <NavLink to="/history" icon={<FaSearch />}>Search</NavLink>
+            <NavLink to="/feed" icon={<FaSearch />}>Social Feed</NavLink>
+            <NavLink to="/discover" icon={<FaSearch />}>Discover Users</NavLink>
+          </VStack>
 
           {isAuthenticated && (
-            <Box mt={4} mb={4}>
+            <Box mt={8}>
               <Link to="/create-watchlist">
                 <Button
                   leftIcon={<FaPlus />}
-                  colorScheme="red"
+                  colorScheme="brand"
                   variant="solid"
-                  size="sm"
+                  size="md"
                   width="100%"
+                  borderRadius="lg"
+                  boxShadow="lg"
+                  _hover={{ transform: "translateY(-2px)", boxShadow: "xl" }}
                 >
                   Create Watchlist
                 </Button>
@@ -241,37 +246,40 @@ const Navbar = () => {
 
         {isAuthenticated && (
           <>
-            <Divider />
+            <Box px={6} py={2}>
+              <Divider borderColor="whiteAlpha.200" />
+            </Box>
 
             {/* My Lists Section */}
             <Box px={4} py={4}>
-              <Text fontWeight="bold" mb={2} color="gray.300">
-                MY LISTS
+              <Text fontWeight="bold" fontSize="xs" letterSpacing="wider" mb={4} color="gray.500" textTransform="uppercase">
+                My Lists
               </Text>
               {watchlist && watchlist.length > 0 ? (
-                <Box>
+                <VStack spacing={1} align="stretch">
                   {watchlist.map((list: Watchlist) => (
                     <Link key={list._id} to={`/watchlist/${list._id}`}>
                       <Flex
                         py={2}
-                        px={3}
+                        px={4}
                         borderRadius="md"
                         _hover={{
-                          bg: "rgba(229, 62, 62, 0.1)",
-                          color: "red.300",
+                          bg: "whiteAlpha.100",
+                          color: "brand.300",
                         }}
                         transition="all 0.2s"
                         align="center"
+                        color="gray.400"
                       >
-                        <Text fontSize="sm" noOfLines={1}>
+                        <Text fontSize="sm" noOfLines={1} fontWeight="medium">
                           {list.name}
                         </Text>
                       </Flex>
                     </Link>
                   ))}
-                </Box>
+                </VStack>
               ) : (
-                <Text fontSize="sm" color="gray.400" fontStyle="italic">
+                <Text fontSize="sm" color="gray.500" fontStyle="italic" px={2}>
                   No watchlists yet
                 </Text>
               )}
@@ -279,30 +287,32 @@ const Navbar = () => {
           </>
         )}
 
-        {/* Footer with Login/Logout Button */}
-        <Box px={4} mt="auto" pb={6} position="sticky" bottom="0">
-          <Divider mb={4} />
+        {/* Footer with User Profile */}
+        <Box px={4} mt="auto" pb={6} position="sticky" bottom="0" bg="dark.card">
+          <Box px={2} py={2}>
+            <Divider borderColor="whiteAlpha.200" mb={4} />
+          </Box>
 
-          {/* User Profile Container - Moved here */}
           {isAuthenticated && (
             <Box
-              borderWidth="1px"
-              borderColor="gray.600"
-              borderRadius="md"
               p={3}
-              bg="gray.700"
+              borderRadius="xl"
+              bg="whiteAlpha.50"
               mb={4}
               cursor="pointer"
-              onClick={() => navigate("/profile")}
-              _hover={{ bg: "gray.600", transition: "all 0.2s" }}
+              onClick={() => navigate(`/profile/${user?._id}`)}
+              _hover={{ bg: "whiteAlpha.100" }}
+              transition="all 0.2s"
+              border="1px"
+              borderColor="whiteAlpha.100"
             >
               <Flex align="center">
-                <Avatar size="sm" name={user?.username} mr={3} />
-                <Box>
-                  <Text fontSize="sm" fontWeight="medium" color="white">
+                <Avatar size="sm" name={user?.username} mr={3} bg="brand.500" />
+                <Box overflow="hidden">
+                  <Text fontSize="sm" fontWeight="bold" color="white" isTruncated>
                     {user?.username}
                   </Text>
-                  <Text fontSize="xs" color="gray.400">
+                  <Text fontSize="xs" color="gray.400" isTruncated>
                     {user?.email}
                   </Text>
                 </Box>
@@ -313,9 +323,11 @@ const Navbar = () => {
           {isAuthenticated && (
             <Button
               colorScheme="red"
-              variant="outline"
+              variant="ghost"
               width="100%"
+              size="sm"
               onClick={() => setLogoutModalOpen(true)}
+              _hover={{ bg: "red.500", color: "white" }}
             >
               Logout
             </Button>
@@ -328,8 +340,6 @@ const Navbar = () => {
           />
         </Box>
       </Box>
-
-
     </>
   );
 };

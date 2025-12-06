@@ -12,6 +12,7 @@ import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
 import Loading from "../components/Loading";
 import { Movie } from "../types";
+import ActivityFeed from "../components/ActivityFeed";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_URL = import.meta.env.VITE_TMDB_BASE_URL;
@@ -126,6 +127,7 @@ const Home = () => {
 
   return (
     <>
+      <ActivityFeed />
       <Box mb={6}>
         <Flex justify="space-between" align="center" mb={4}>
           <h2 className="text-2xl font-bold text-gray-100">Trending</h2>

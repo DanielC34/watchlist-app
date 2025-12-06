@@ -27,6 +27,9 @@ export interface WatchlistItem {
   media_type: "movie" | "tv";
   releaseDate?: string;
   addedAt: string;
+  status?: "watched" | "watching" | "plan_to_watch";
+  rating?: number;
+  personalNotes?: string;
 }
 
 export interface Watchlist {

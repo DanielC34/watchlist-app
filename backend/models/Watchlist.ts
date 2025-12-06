@@ -46,6 +46,20 @@ const WatchlistSchema = new Schema<WatchlistDocument>(
           type: Date,
           default: Date.now,
         },
+        status: {
+          type: String,
+          enum: ["watched", "watching", "plan_to_watch"],
+          default: "plan_to_watch",
+        },
+        rating: {
+          type: Number,
+          min: 1,
+          max: 5,
+        },
+        personalNotes: {
+          type: String,
+          trim: true,
+        },
       },
     ],
   },

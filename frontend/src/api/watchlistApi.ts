@@ -206,3 +206,40 @@ export const removeItemFromWatchlistAPI = async (
     throw new Error(errorMessage);
   }
 };
+
+export const updateWatchlistItemAPI = async (
+  watchlistId: string,
+  itemId: string,
+  updates: { status?: string; rating?: number; personalNotes?: string }
+): Promise<Watchlist> => {
+  try {
+    const csrfResponse = await api.get("/csrf-token");
+    const csrfToken = csrfResponse.data.csrfToken;
+
+    const response = await api.put(
+      `/watchlist/${watchlistId}/items/${itemId}`,
+      updates,
+      {
+        headers: {
+          "X-CSRF-Token": csrfToken,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Failed to update item";
+    throw new Error(errorMessage);
+  }
+};
+
+export const getRecentActivityAPI = async (): Promise<WatchlistItem[]> => {
+  try {
+    const response = await api.get("/watchlist/activity/recent");
+    return response.data;
+  } catch (error: any) {
+    const errorMessage =
+      error.response?.data?.message || "Failed to fetch recent activity";
+    throw new Error(errorMessage);
+  }
+};

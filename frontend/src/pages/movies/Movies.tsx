@@ -1,11 +1,13 @@
 import { useState, useEffect, ChangeEvent } from "react";
-import { Flex, Button, Select } from "@chakra-ui/react";
+import { Flex, Button, Select, Heading, Text, Box, Container } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import MovieCard from "../../components/MovieCard";
+import MovieGrid from "../../components/MovieGrid";
 
 const API_KEY = import.meta.env.VITE_MOVIEDB_API_KEY;
 const BASE_MOVIE_URL = "https://api.themoviedb.org/3";
-const ITEMS_PER_PAGE = 30; // Number of items per page
+const ITEMS_PER_PAGE = 30;
 type MovieCategory = "popular" | "top_rated" | "upcoming" | "now_playing";
 
 interface MovieSummary {
@@ -37,7 +39,6 @@ const Movies = () => {
 
   const fetchMovies = async (selectedCategory: MovieCategory, page: number) => {
     try {
-      // Validate category to prevent SSRF
       const allowedCategories: MovieCategory[] = [
         "popular",
         "top_rated",
@@ -47,12 +48,11 @@ const Movies = () => {
       if (!allowedCategories.includes(selectedCategory)) {
         throw new Error("Invalid category parameter");
       }
-      
-      // Validate page parameter to prevent SSRF
+
       if (!Number.isInteger(page) || page < 1 || page > 1000) {
         throw new Error("Invalid page parameter");
       }
-      
+
       const response = await axios.get(
         `${BASE_MOVIE_URL}/movie/${selectedCategory}?api_key=${API_KEY}&page=${page}`
       );
@@ -78,12 +78,14 @@ const Movies = () => {
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
@@ -92,19 +94,24 @@ const Movies = () => {
   };
 
   return (
-    <>
-      <Flex justify="space-between" align="center" mb={6} flexWrap="wrap" gap={4}>
-        <h2 className="text-2xl font-bold text-gray-100">Movies</h2>
+    <Container maxW="full" p={0}>
+      <Flex justify="space-between" align="center" mb={8} flexWrap="wrap" gap={4}>
+        <Box>
+          <Heading as="h2" size="lg" mb={1}>Movies</Heading>
+          <Text color="gray.400" fontSize="sm">Browse movies by category</Text>
+        </Box>
+
         <Flex align="center" gap={3}>
-          <span className="text-sm text-gray-400 hidden md:inline">Category:</span>
+          <Text fontSize="sm" color="gray.400" display={{ base: "none", md: "block" }}>Category:</Text>
           <Select
             value={category}
             onChange={handleCategoryChange}
             size="md"
-            w={{ base: "auto", md: "200px" }}
-            bg="gray.900"
-            borderColor="gray.700"
-            _hover={{ borderColor: "gray.600" }}
+            w={{ base: "150px", md: "200px" }}
+            variant="filled"
+            bg="dark.card"
+            _hover={{ bg: "whiteAlpha.100" }}
+            _focus={{ bg: "dark.card", borderColor: "brand.500" }}
           >
             <option value="popular">Popular</option>
             <option value="top_rated">Top Rated</option>
@@ -114,29 +121,19 @@ const Movies = () => {
         </Flex>
       </Flex>
 
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-3">
+      <MovieGrid>
         {movies.map((movie) => (
-          <div
+          <MovieCard
             key={movie.id}
-            className="group cursor-pointer"
-            onClick={() => handleCardClick(movie.id)}
-          >
-            <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-hover:shadow-xl">
-              <img
-                src={`https://image.tmdb.org/t/p/w500${movie.poster_path ?? ""}`}
-                alt={movie.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-            </div>
-            <h3 className="text-xs font-medium mt-2 line-clamp-2 text-gray-300">
-              {movie.title}
-            </h3>
-          </div>
+            id={movie.id}
+            title={movie.title}
+            posterPath={movie.poster_path}
+            onClick={handleCardClick}
+          />
         ))}
-      </div>
+      </MovieGrid>
 
-      <Flex justifyContent="center" align="center" mt={8} gap={4}>
+      <Flex justifyContent="center" align="center" mt={10} gap={4} pb={8}>
         <Button
           onClick={prevPage}
           isDisabled={currentPage === 1}
@@ -146,9 +143,9 @@ const Movies = () => {
         >
           Previous
         </Button>
-        <p className="text-sm text-gray-400">
-          {currentPage} / {totalPages}
-        </p>
+        <Text fontSize="sm" color="gray.400">
+          Page {currentPage} of {totalPages || 1}
+        </Text>
         <Button
           onClick={nextPage}
           isDisabled={currentPage === totalPages}
@@ -159,7 +156,7 @@ const Movies = () => {
           Next
         </Button>
       </Flex>
-    </>
+    </Container>
   );
 };
 

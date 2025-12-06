@@ -6,6 +6,8 @@ export interface IUser {
   email: string;
   password: string;
   profilePicture?: string;
+  followers: string[];
+  following: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,6 +20,9 @@ export interface IWatchlistItem {
   mediaType: "movie" | "tv";
   releaseDate?: string;
   addedAt: Date;
+  status?: "watched" | "watching" | "plan_to_watch";
+  rating?: number; // 1-5
+  personalNotes?: string;
 }
 
 export interface IWatchlist {

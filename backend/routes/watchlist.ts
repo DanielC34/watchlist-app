@@ -8,6 +8,8 @@ import {
   deleteWatchlist,
   addItemToWatchlist,
   removeItemFromWatchlist,
+  updateWatchlistItem,
+  getRecentActivity,
 } from "../controllers/watchlistController";
 import { protect } from "../middleware/authMiddleware";
 
@@ -26,5 +28,12 @@ router.delete(
   csrfProtection,
   removeItemFromWatchlist
 );
+router.put(
+  "/:id/items/:itemId",
+  protect,
+  csrfProtection,
+  updateWatchlistItem
+);
+router.get("/activity/recent", protect, getRecentActivity);
 
 export default router;

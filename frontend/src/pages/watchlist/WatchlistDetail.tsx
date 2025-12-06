@@ -22,12 +22,13 @@ import {
   FaArrowLeft,
   FaTrash,
   FaEdit,
-  FaBookmark,
-  FaRegBookmark,
+  FaStar,
 } from "react-icons/fa";
 import { useWatchlistStore } from "../../store/useWatchlistStore";
 import useAuthStore from "../../store/useAuthStore";
 import { WatchlistItem } from "../../types";
+import StatusToggle from "../../components/StatusToggle";
+import EditItemModal from "../../components/EditItemModal";
 
 const WatchlistDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,6 +37,8 @@ const WatchlistDetail = () => {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editingItem, setEditingItem] = useState<WatchlistItem | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { isAuthenticated } = useAuthStore();
   const {
@@ -46,9 +49,6 @@ const WatchlistDetail = () => {
     removeItemFromWatchlist,
     deleteWatchlist,
     getWatchlist,
-    addItemToWatchlist,
-    watchlist,
-    ensureWatchedWatchlist,
   } = useWatchlistStore();
 
   useEffect(() => {
@@ -56,11 +56,6 @@ const WatchlistDetail = () => {
       fetchWatchlistById(id);
     }
   }, [id, isAuthenticated, fetchWatchlistById]);
-
-  const watchedWatchlist = watchlist.find((wl) => wl.name === "Watched");
-  const watchedItemIds = watchedWatchlist
-    ? watchedWatchlist.items.map((item) => item._id)
-    : [];
 
   const openDeleteModal = () => setIsDeleteModalOpen(true);
   const closeDeleteModal = () => {
@@ -100,6 +95,11 @@ const WatchlistDetail = () => {
     }
   };
 
+  const handleEditItem = (item: WatchlistItem) => {
+    setEditingItem(item);
+    setIsEditModalOpen(true);
+  };
+
   const handleRemoveItem = async (itemId: string) => {
     if (!id) return;
     const success = await removeItemFromWatchlist(id, itemId);
@@ -120,45 +120,12 @@ const WatchlistDetail = () => {
     }
   };
 
-  const handleMarkAsWatched = async (item: WatchlistItem) => {
-    try {
-      const watched = await ensureWatchedWatchlist();
-      if (
-        watched &&
-        watched.items.some((watchedItem) => watchedItem._id === item._id)
-      ) {
-        toast({
-          title: "Already in Watched",
-          status: "info",
-          duration: 2000,
-          isClosable: true,
-        });
-        return;
-      }
-      if (watched) {
-        await addItemToWatchlist(watched._id, item);
-        toast({
-          title: "Added to Watched!",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Could not add to Watched.",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
-    }
-  };
+
 
   const LoadingModal = () => (
     <Modal
       isOpen={isLoading}
-      onClose={() => {}}
+      onClose={() => { }}
       isCentered
       closeOnOverlayClick={false}
       blockScrollOnMount={false}
@@ -186,7 +153,7 @@ const WatchlistDetail = () => {
   const DeleteConfirmationModal = () => (
     <Modal
       isOpen={isDeleteModalOpen}
-      onClose={isDeleting ? () => {} : closeDeleteModal}
+      onClose={isDeleting ? () => { } : closeDeleteModal}
       isCentered
     >
       <ModalOverlay />
@@ -282,7 +249,6 @@ const WatchlistDetail = () => {
         {currentWatchlist.items && currentWatchlist.items.length > 0 ? (
           <Grid templateColumns="repeat(auto-fill, minmax(150px, 1fr))" gap={4}>
             {currentWatchlist.items.map((item) => {
-              const isWatched = watchedItemIds.includes(item._id);
               return (
                 <Box
                   key={item._id}
@@ -305,21 +271,40 @@ const WatchlistDetail = () => {
                   </Box>
                   <Box position="absolute" top={2} left={2} zIndex={1}>
                     <IconButton
-                      icon={
-                        isWatched ? (
-                          <FaBookmark color="#E53E3E" size={20} />
-                        ) : (
-                          <FaRegBookmark color="#A0AEC0" size={20} />
-                        )
-                      }
-                      aria-label={isWatched ? "Watched" : "Mark as watched"}
+                      icon={<FaEdit />}
+                      aria-label="Edit item"
                       size="sm"
-                      variant="ghost"
-                      isDisabled={isWatched}
+                      colorScheme="blue"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleMarkAsWatched(item);
+                        handleEditItem(item);
                       }}
+                    />
+                  </Box>
+                  {item.rating && (
+                    <Box
+                      position="absolute"
+                      top={2}
+                      right={12}
+                      zIndex={1}
+                      bg="rgba(0,0,0,0.7)"
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                      display="flex"
+                      alignItems="center"
+                    >
+                      <FaStar color="#ECC94B" size={12} />
+                      <Text ml={1} fontSize="xs" fontWeight="bold" color="white">
+                        {item.rating}
+                      </Text>
+                    </Box>
+                  )}
+                  <Box position="absolute" bottom={2} left={2} right={2} zIndex={1}>
+                    <StatusToggle
+                      watchlistId={currentWatchlist._id}
+                      itemId={item._id}
+                      currentStatus={item.status}
                     />
                   </Box>
                   <img
@@ -335,6 +320,7 @@ const WatchlistDetail = () => {
                       {item.media_type === "movie" ? "Movie" : "TV Show"}
                     </Text>
                   </Box>
+                  <Box h="40px" /> {/* Spacer for toggle */}
                 </Box>
               );
             })}
@@ -348,6 +334,18 @@ const WatchlistDetail = () => {
           </Box>
         )}
       </Container>
+      {editingItem && (
+        <EditItemModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingItem(null);
+          }}
+          item={editingItem}
+          watchlistId={id || ""}
+        />
+      )
+      }
     </>
   );
 };

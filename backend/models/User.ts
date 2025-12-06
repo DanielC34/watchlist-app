@@ -15,6 +15,8 @@ const UserSchema = new Schema<UserDocument>(
     },
     password: { type: String, required: true, minlength: 6 },
     profilePicture: { type: String, default: "" },
+    followers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    following: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   {
     timestamps: true,

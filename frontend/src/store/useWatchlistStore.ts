@@ -7,6 +7,7 @@ import {
   removeItemFromWatchlistAPI,
   deleteWatchlistAPI,
   getWatchlistByIdAPI,
+  updateWatchlistItemAPI,
 } from "../api/watchlistApi";
 import { Watchlist, WatchlistItem } from "../types";
 
@@ -36,6 +37,11 @@ interface WatchlistState {
   ) => Promise<boolean>;
   deleteWatchlist: (watchlistId: string) => Promise<boolean>;
   ensureWatchedWatchlist: () => Promise<Watchlist | undefined>;
+  updateWatchlistItem: (
+    watchlistId: string,
+    itemId: string,
+    updates: { status?: string; rating?: number; personalNotes?: string }
+  ) => Promise<void>;
 }
 
 export const useWatchlistStore = create<WatchlistState>((set, get) => ({
@@ -146,11 +152,11 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
         currentWatchlist:
           state.currentWatchlist && state.currentWatchlist._id === watchlistId
             ? {
-                ...state.currentWatchlist,
-                items: state.currentWatchlist.items.filter(
-                  (item) => item._id !== itemId
-                ),
-              }
+              ...state.currentWatchlist,
+              items: state.currentWatchlist.items.filter(
+                (item) => item._id !== itemId
+              ),
+            }
             : state.currentWatchlist,
       }));
       return true;
@@ -188,5 +194,28 @@ export const useWatchlistStore = create<WatchlistState>((set, get) => ({
       );
     }
     return watched;
+  },
+
+  updateWatchlistItem: async (watchlistId, itemId, updates) => {
+    try {
+      set({ loading: true });
+      const updatedWatchlist = await updateWatchlistItemAPI(
+        watchlistId,
+        itemId,
+        updates
+      );
+      set((state) => ({
+        watchlist: state.watchlist.map((wl) =>
+          wl._id === watchlistId ? updatedWatchlist : wl
+        ),
+        currentWatchlist:
+          state.currentWatchlist?._id === watchlistId
+            ? updatedWatchlist
+            : state.currentWatchlist,
+        loading: false,
+      }));
+    } catch (error: any) {
+      set({ error: error.message, loading: false });
+    }
   },
 }));

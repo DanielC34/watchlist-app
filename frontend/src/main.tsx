@@ -13,8 +13,8 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import pageTheme from "../pageTheme.js";
-import Profile from "./pages/profile/Profile";
+import theme from "./theme";
+import Profile from "./pages/Profile";
 import CreateWatchlist from "./pages/watchlist/CreateWatchlist";
 import EditWatchlist from "./pages/watchlist/EditWatchlist";
 import History from "./pages/history/History";
@@ -22,6 +22,8 @@ import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import Watchlist from "./pages/watchlist/CreateWatchlist";
 import WatchlistDetail from "./pages/watchlist/WatchlistDetail";
+import DiscoverUsers from "./pages/DiscoverUsers";
+import SocialFeed from "./pages/SocialFeed";
 
 const router = createBrowserRouter([
   {
@@ -45,6 +47,14 @@ const router = createBrowserRouter([
         element: <Search />,
       },
       {
+        path: "/discover",
+        element: <DiscoverUsers />,
+      },
+      {
+        path: "/feed",
+        element: <SocialFeed />,
+      },
+      {
         path: "/watchlist/:id",
         element: <WatchlistDetail />,
       },
@@ -53,7 +63,7 @@ const router = createBrowserRouter([
         element: <EditWatchlist />,
       },
       {
-        path: "/profile",
+        path: "/profile/:userId",
         element: <Profile />,
       },
       {
@@ -91,8 +101,8 @@ const router = createBrowserRouter([
 const rootElement = document.getElementById("root");
 ReactDOM.createRoot(rootElement!).render(
   <React.StrictMode>
-    <ColorModeScript initialColorMode={pageTheme.config.initialColorMode} />
-    <ChakraProvider theme={pageTheme}>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <ChakraProvider theme={theme}>
       <RouterProvider router={router} />
     </ChakraProvider>
   </React.StrictMode>
